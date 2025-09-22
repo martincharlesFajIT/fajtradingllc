@@ -9,7 +9,7 @@ import HomePage from './src/screens/HomePage';
 const App = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#232F3E" />
+      <StatusBar barStyle="light-content" backgroundColor="#da4925ff" />
       <HomePage />
     </SafeAreaView>
   );
