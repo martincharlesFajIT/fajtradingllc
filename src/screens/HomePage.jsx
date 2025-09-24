@@ -10,24 +10,77 @@ import {
   Dimensions,
   ActivityIndicator,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
 import { fetchProductsByCollection, fetchCollectionByHandle } from '../shopifyApi';
 
 const { width } = Dimensions.get('window');
 
 const HomePage = () => {
+  const navigation = useNavigation();
 
+  // Single state for all collections
+  const [collections, setCollections] = useState({});
+  const [loading, setLoading] = useState({});
+
+  // Define your collection groups
+  const COLLECTION_GROUPS = {
+    featured: {
+      title: "Coffee Machines",
+      handles: [
+        'professional-coffee-machines',
+        'automatic-coffee-machine', 
+        'coffee-equipment',
+        'delonghi-automatic-coffee-machine'
+      ]
+    },
+    homeAppliances: {
+      title: "Home Appliances",
+      handles: [
+        'kitchen-appliances',
+        'home-appliance',
+        'water-heater',
+        'all-spare-accessories'
+      ]
+    },
+    Electronics: {
+      title: "Electronic", 
+      handles: [
+        'energy-power-quality-analyzer',
+        'electrical-and-electronics',
+        'stabilizer-and-transformer',
+        'dehumidifier'
+      ]
+    }
+  };
+
+  // Generic function to load collections
+  const loadCollections = async (groupKey, handles) => {
+    try {
+      setLoading(prev => ({ ...prev, [groupKey]: true }));
+      
+      const collectionPromises = handles.map(handle =>
+        fetchCollectionByHandle(handle)
+      );
+      
+      const results = await Promise.all(collectionPromises);
+      const validCollections = results.filter(collection => collection !== null);
+      
+      setCollections(prev => ({
+        ...prev,
+        [groupKey]: validCollections
+      }));
+      
+    } catch (error) {
+      console.error(`Error fetching ${groupKey} collections:`, error);
+    } finally {
+      setLoading(prev => ({ ...prev, [groupKey]: false }));
+    }
+  };
+
+  // Load products for specific collection
   const [coffeeMachines, setCoffeeMachines] = useState([]);
-  const [specificCollections, setSpecificCollections] = useState([]);
   const [loadingCoffee, setLoadingCoffee] = useState(true);
-  const [loadingSpecificCollections, setLoadingSpecificCollections] = useState(true);
-
-  const FEATURED_COLLECTIONS = [
-    'professional-coffee-machines',
-    'automatic-coffee-machine',
-    'coffee-equipment',
-    'delonghi-automatic-coffee-machine'
-  ];
 
   useEffect(() => {
     const loadCoffeeMachines = async () => {
@@ -43,32 +96,14 @@ const HomePage = () => {
     loadCoffeeMachines();
   }, []);
 
-
+  // Load all collection groups
   useEffect(() => {
-    const loadSpecificCollections = async () => {
-      try {
-        console.log("🎯 Loading specific collections:", FEATURED_COLLECTIONS);
-
-        const collectionPromises = FEATURED_COLLECTIONS.map(handle =>
-          fetchCollectionByHandle(handle)
-        );
-
-
-        const results = await Promise.all(collectionPromises);
-        const validCollections = results.filter(collection => collection !== null);
-
-        console.log("Specific collections loaded:", validCollections);
-        setSpecificCollections(validCollections);
-
-      } catch (error) {
-        console.error("Error fetching specific collections:", error);
-      } finally {
-        setLoadingSpecificCollections(false);
-      }
-    };
-    loadSpecificCollections();
+    Object.entries(COLLECTION_GROUPS).forEach(([groupKey, group]) => {
+      loadCollections(groupKey, group.handles);
+    });
   }, []);
 
+  // Your existing static data
   const bannerData = [
     { id: 1, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcK6Z2RB7mrb6haKMoFcmz_6JyFaK7r1m5Wg&s' },
     { id: 2, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcK6Z2RB7mrb6haKMoFcmz_6JyFaK7r1m5Wg&s' },
@@ -76,41 +111,13 @@ const HomePage = () => {
   ];
 
   const categories = [
-    {
-      id: 1,
-      name: 'Coffee Machine',
-      image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_82110317-e2b4-47b5-8395-54aade9aaf0f_200x200.jpg?v=1746439090'
-    },
-    {
-      id: 2,
-      name: 'Vacuum Cleaner',
-      image: 'https://www.fajtradingllc.com/cdn/shop/collections/robotic-vacuum-cleaner_a0aa2b94-945e-4fa8-8990-8a02e39273e7_375x.jpg?v=1746444970'
-    },
-    {
-      id: 3,
-      name: 'Washing Machine',
-      image: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=300&h=400&fit=crop&crop=center'
-    },
-    {
-      id: 4,
-      name: 'Cookers',
-      image: 'https://www.fajtradingllc.com/cdn/shop/collections/Dr_Coffee_F11_Pro_Fully_Automatic_Coffee_Machine_535x.png?v=1746437119'
-    },
-    {
-      id: 5,
-      name: 'Air Conditioner',
-      image: 'https://www.fajtradingllc.com/cdn/shop/collections/ac_39ccf573-4268-48b7-bfb6-c90f3ea4fc32_535x.jpg?v=1746443774'
-    },
-    {
-      id: 6,
-      name: 'Dishwasher',
-      image: 'https://www.fajtradingllc.com/cdn/shop/files/3_e7c0d71f-e53f-4a2c-8caa-0d63ee546891_535x.jpg?v=1737182158'
-    },
-    {
-      id: 7,
-      name: 'Refrigerators',
-      image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_375x.jpg?v=1746432020'
-    },
+    { id: 1, name: 'Coffee Machine', image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_82110317-e2b4-47b5-8395-54aade9aaf0f_200x200.jpg?v=1746439090' },
+    { id: 2, name: 'Vacuum Cleaner', image: 'https://www.fajtradingllc.com/cdn/shop/collections/robotic-vacuum-cleaner_a0aa2b94-945e-4fa8-8990-8a02e39273e7_375x.jpg?v=1746444970' },
+    { id: 3, name: 'Washing Machine', image: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=300&h=400&fit=crop&crop=center' },
+    { id: 4, name: 'Cookers', image: 'https://www.fajtradingllc.com/cdn/shop/collections/Dr_Coffee_F11_Pro_Fully_Automatic_Coffee_Machine_535x.png?v=1746437119' },
+    { id: 5, name: 'Air Conditioner', image: 'https://www.fajtradingllc.com/cdn/shop/collections/ac_39ccf573-4268-48b7-bfb6-c90f3ea4fc32_535x.jpg?v=1746443774' },
+    { id: 6, name: 'Dishwasher', image: 'https://www.fajtradingllc.com/cdn/shop/files/3_e7c0d71f-e53f-4a2c-8caa-0d63ee546891_535x.jpg?v=1737182158' },
+    { id: 7, name: 'Refrigerators', image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_375x.jpg?v=1746432020' },
   ];
 
   const deals = [
@@ -118,12 +125,72 @@ const HomePage = () => {
     { id: 2, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Coffee', discount: '40%' },
     { id: 3, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Coffee', discount: '40%' },
   ];
+
   const featuredpartners = [
     { id: 1, name: 'Gaming Laptop', originalPrice: '$199.99', salePrice: '$899.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Laptop', discount: '31%' },
     { id: 2, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Coffee', discount: '40%' },
     { id: 3, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Coffee', discount: '40%' },
   ];
 
+  // Reusable component for collection grid
+  const CollectionGrid = ({ groupKey, title }) => {
+    const groupCollections = collections[groupKey] || [];
+    const isLoading = loading[groupKey];
+
+    return (
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{title}</Text>
+          <TouchableOpacity>
+            <Text style={styles.seeAllText}>See all</Text>
+          </TouchableOpacity>
+        </View>
+
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#000" style={{ marginVertical: 20 }} />
+        ) : groupCollections.length === 0 ? (
+          <Text style={{ textAlign: "center", marginVertical: 20 }}>
+            No {title.toLowerCase()} found.
+          </Text>
+        ) : (
+          <View style={styles.gridContainer}>
+            {groupCollections.slice(0, 6).map((item, index) => (
+              <TouchableOpacity
+                key={`${groupKey}-${item.id}`}
+                style={styles.gridItem}
+                onPress={() => {
+                console.log("Navigate to collection:", item.title, item.handle);
+                navigation.navigate('CollectionProducts', { 
+                handle: item.handle, 
+                title: item.title 
+                });
+                }}
+              >
+                <Image
+                  source={{
+                    uri: item.image || 'https://via.placeholder.com/200x150/E0E0E0/666666?text=No+Image'
+                  }}
+                  style={styles.gridImage}
+                />
+                <View style={styles.gridOverlay}>
+                  <Text style={styles.gridText}>{item.title}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+
+            {/* Fill empty spots if less than 4 collections */}
+            {groupCollections.length < 4 && Array.from({ length: 4 - groupCollections.length }).map((_, index) => (
+              <View key={`empty-${groupKey}-${index}`} style={[styles.gridItem, styles.emptyGridItem]}>
+                <Text style={styles.emptyGridText}>Coming Soon</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  // Your existing render functions
   const renderBanner = ({ item }) => (
     <TouchableOpacity style={styles.bannerItem}>
       <Image source={{ uri: item.image }} style={styles.bannerImage} />
@@ -131,7 +198,12 @@ const HomePage = () => {
   );
 
   const renderCategory = ({ item }) => (
-    <TouchableOpacity style={styles.categoryItem}>
+    <TouchableOpacity 
+      style={styles.categoryItem}
+      onPress={() => {
+        console.log("Navigate to category:", item.name);
+      }}
+    >
       <Image source={{ uri: item.image }} style={styles.categoryImage} />
       <View style={styles.categoryOverlay}>
         <Text style={styles.categoryName}>{item.name}</Text>
@@ -140,7 +212,12 @@ const HomePage = () => {
   );
 
   const renderProduct = ({ item }) => (
-    <TouchableOpacity style={styles.productItem}>
+    <TouchableOpacity 
+      style={styles.productItem}
+      onPress={() => {
+        console.log("Navigate to product:", item.name);
+      }}
+    >
       <Image source={{ uri: item.image }} style={styles.productImage} />
       <View style={styles.productInfo}>
         <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
@@ -155,7 +232,12 @@ const HomePage = () => {
   );
 
   const renderDeal = ({ item }) => (
-    <TouchableOpacity style={styles.dealItem}>
+    <TouchableOpacity 
+      style={styles.dealItem}
+      onPress={() => {
+        console.log("Navigate to deal:", item.name);
+      }}
+    >
       <Image source={{ uri: item.image }} style={styles.dealImage} />
       <View style={styles.dealInfo}>
         <View style={styles.discountBadge}>
@@ -201,10 +283,10 @@ const HomePage = () => {
           />
         </View>
 
-        {/* Today's Deals */}
+        {/* Sponsor Products */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Sponser Products</Text>
+            <Text style={styles.sectionTitle}>Sponsor Products</Text>
             <TouchableOpacity>
               <Text style={styles.seeAllText}>See all</Text>
             </TouchableOpacity>
@@ -219,6 +301,7 @@ const HomePage = () => {
           />
         </View>
 
+        {/* Featured by Partners */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Featured by Partners</Text>
@@ -236,53 +319,10 @@ const HomePage = () => {
           />
         </View>
 
-        {/* Specific Featured Collections in 2x2 Grid */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Coffee Machines</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
-            </TouchableOpacity>
-          </View>
-
-          {loadingSpecificCollections ? (
-            <ActivityIndicator size="large" color="#000" style={{ marginVertical: 20 }} />
-          ) : specificCollections.length === 0 ? (
-            <Text style={{ textAlign: "center", marginVertical: 20 }}>
-              No featured collections found.
-            </Text>
-          ) : (
-            <View style={styles.gridContainer}>
-              {specificCollections.slice(0, 4).map((item, index) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.gridItem}
-                  onPress={() => {
-                    console.log("Navigate to collection:", item.title, item.handle);
-                    // navigation.navigate('CollectionProducts', { handle: item.handle, title: item.title });
-                  }}
-                >
-                  <Image
-                    source={{
-                      uri: item.image || 'https://via.placeholder.com/200x150/E0E0E0/666666?text=No+Image'
-                    }}
-                    style={styles.gridImage}
-                  />
-                  <View style={styles.gridOverlay}>
-                    <Text style={styles.gridText}>{item.title}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-
-              {/* Fill empty spots if less than 4 collections */}
-              {specificCollections.length < 4 && Array.from({ length: 4 - specificCollections.length }).map((_, index) => (
-                <View key={`empty-${index}`} style={[styles.gridItem, styles.emptyGridItem]}>
-                  <Text style={styles.emptyGridText}>Collection {specificCollections.length + index + 1}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
+        {/* Dynamic Collection Grids */}
+        <CollectionGrid groupKey="featured" title="Coffee Machines" />
+        <CollectionGrid groupKey="homeAppliances" title="Home Appliances" />
+        <CollectionGrid groupKey="Electronics" title="Electronics" />
 
         {/* Professional Coffee Machines from Shopify */}
         <View style={styles.section}>
@@ -328,7 +368,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#232F3E',
     paddingHorizontal: 15,
@@ -359,7 +399,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
 
-  // Category Styles - Updated for vertical banner style
+  // Category Styles
   categoriesContainer: {
     paddingHorizontal: 10,
   },
@@ -392,7 +432,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   categoryName: {
-    fontSize: 13,
+    fontSize: 16,
     textAlign: 'center',
     color: '#FFFFFF',
     fontWeight: '600',
@@ -491,13 +531,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     height: 35,
   },
-  ratingContainer: {
-    marginBottom: 5,
-  },
-  rating: {
-    fontSize: 12,
-    color: '#FF9900',
-  },
   productPrice: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -507,7 +540,7 @@ const styles = StyleSheet.create({
     height: 20,
   },
 
-  // shop  by category
+  // Collection Grid Styles
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -543,9 +576,18 @@ const styles = StyleSheet.create({
   },
   gridText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     textAlign: 'left',
+  },
+  emptyGridItem: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+  },
+  emptyGridText: {
+    color: '#666',
+    fontSize: 14,
   },
 });
 
