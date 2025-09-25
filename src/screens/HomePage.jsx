@@ -54,7 +54,6 @@ const HomePage = () => {
     }
   };
 
-  // Generic function to load collections
   const loadCollections = async (groupKey, handles) => {
     try {
       setLoading(prev => ({ ...prev, [groupKey]: true }));
@@ -78,7 +77,6 @@ const HomePage = () => {
     }
   };
 
-  // Load products for specific collection
   const [coffeeMachines, setCoffeeMachines] = useState([]);
   const [loadingCoffee, setLoadingCoffee] = useState(true);
 
@@ -96,14 +94,13 @@ const HomePage = () => {
     loadCoffeeMachines();
   }, []);
 
-  // Load all collection groups
+  
   useEffect(() => {
     Object.entries(COLLECTION_GROUPS).forEach(([groupKey, group]) => {
       loadCollections(groupKey, group.handles);
     });
   }, []);
 
-  // Your existing static data
   const bannerData = [
     { id: 1, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcK6Z2RB7mrb6haKMoFcmz_6JyFaK7r1m5Wg&s' },
     { id: 2, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcK6Z2RB7mrb6haKMoFcmz_6JyFaK7r1m5Wg&s' },
@@ -121,18 +118,27 @@ const HomePage = () => {
   ];
 
   const deals = [
-    { id: 1, name: 'Gaming Laptop', originalPrice: '$1299.99', salePrice: '$899.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Laptop', discount: '31%' },
-    { id: 2, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Coffee', discount: '40%' },
-    { id: 3, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Coffee', discount: '40%' },
+    { id: 1, name: 'Gaming Laptop', salePrice: '$899.99', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc4aSsFA96t5sfaxwxD8bbbDzYnusOissMZA&s', discount: '31%' },
+    { id: 2, name: 'Coffee Maker', salePrice: '$89.99', image: 'https://down-sg.img.susercontent.com/file/cn-11134207-7ras8-m6evdp35a2fn73', discount: '40%' },
+    { id: 3, name: 'Coffee Maker', salePrice: '$89.99', image: 'https://cumuluscoffee.com/cdn/shop/files/image6344284.jpg?v=1750178201&width=2475', discount: '40%' },
+  ];
+
+    const shopsave = [
+    { id: 1, name: 'How to get free deliveries', image: 'https://img.freepik.com/premium-photo/delivery-man-red-uniform-holding-phone-with-blank-screen-custom-app-promotion-branding_1267867-19074.jpg?w=360'},
+    { id: 2, name: 'How to Return an items',  image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNORpbLTSRP4WB99TmvnQ3aLCAKxlkruStYZeWJ_IeVIFbWAQnBWG4tTzZaLWH09GG4yc&usqp=CAU'},
+    { id: 3, name: 'How to contact us',  image: 'https://img.freepik.com/premium-photo/delivery-man-red-uniform-holding-phone-with-blank-screen-custom-app-promotion-branding_1267867-19062.jpg?w=360'},
+    { id: 4, name: 'How to pay with cash',  image: 'https://images.pond5.com/back-rear-view-delivery-young-footage-136281600_iconl.jpeg'},
+    { id: 5, name: 'How to place an order',  image: 'https://www.shutterstock.com/shutterstock/videos/1092499343/thumb/4.jpg?ip=x480'},
+    { id: 6, name: 'How to create a new account',  image: 'https://thumbs.dreamstime.com/b/handwriting-text-writing-login-concept-meaning-entering-website-blog-using-username-password-registration-halftone-blank-180749996.jpg'},
   ];
 
   const featuredpartners = [
-    { id: 1, name: 'Gaming Laptop', originalPrice: '$199.99', salePrice: '$899.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Laptop', discount: '31%' },
-    { id: 2, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Coffee', discount: '40%' },
+    { id: 1, name: 'Gaming Laptop', originalPrice: '$199.99', salePrice: '$899.99', image: 'https://cumuluscoffee.com/cdn/shop/files/image6344284.jpg?v=1750178201&width=2475', discount: '31%' },
+    { id: 2, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzXB4-Y4B_3R3GUH04tTjmMQx7VbUfA-pkuA&s', discount: '40%' },
     { id: 3, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Coffee', discount: '40%' },
   ];
 
-  // Reusable component for collection grid
+  
   const CollectionGrid = ({ groupKey, title }) => {
     const groupCollections = collections[groupKey] || [];
     const isLoading = loading[groupKey];
@@ -252,6 +258,20 @@ const HomePage = () => {
     </TouchableOpacity>
   );
 
+  const saveshop = ({ item }) => (
+    <TouchableOpacity 
+      style={styles.dealItem}
+      onPress={() => {
+        console.log("Navigate to deal:", item.name);
+      }}
+    >
+      <Image source={{ uri: item.image }} style={styles.dealImage} />
+      <View style={styles.dealInfo}>      
+        <Text style={styles.dealName} numberOfLines={1}>{item.name}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       <Header />
@@ -301,7 +321,7 @@ const HomePage = () => {
           />
         </View>
 
-        {/* Featured by Partners */}
+         {/* Featured by Partners */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Featured by Partners</Text>
@@ -319,15 +339,53 @@ const HomePage = () => {
           />
         </View>
 
+       
+
         {/* Dynamic Collection Grids */}
+
         <CollectionGrid groupKey="featured" title="Coffee Machines" />
+
+         {/* Featured by Partners */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Get Discount on Coffee machine</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAllText}>See all</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={deals}
+            renderItem={renderDeal}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.dealsContainer}
+          />
+        </View>
         <CollectionGrid groupKey="homeAppliances" title="Home Appliances" />
         <CollectionGrid groupKey="Electronics" title="Electronics" />
 
-        {/* Professional Coffee Machines from Shopify */}
-        <View style={styles.section}>
+        {/* Save and Shop Slider */}
+          <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Professional Coffee Machines</Text>
+            <Text style={styles.sectionTitle}>Shop & save on FAJ Tradding LLC</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAllText}>See all</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={shopsave}
+            renderItem={saveshop}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.dealsContainer}
+          />
+        </View>
+
+        {/* <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Discover Product for you</Text>
             <TouchableOpacity>
               <Text style={styles.seeAllText}>See all</Text>
             </TouchableOpacity>
@@ -349,7 +407,9 @@ const HomePage = () => {
               contentContainerStyle={styles.productsGrid}
             />
           )}
-        </View>
+        </View> */}
+
+          
         
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -368,7 +428,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#232F3E',
     paddingHorizontal: 15,
@@ -455,7 +515,7 @@ const styles = StyleSheet.create({
   },
   dealImage: {
     width: '100%',
-    height: 120,
+    height: 200,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
     resizeMode: 'cover',
@@ -479,8 +539,8 @@ const styles = StyleSheet.create({
   },
   dealName: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#232F3E',
+    fontWeight: '800',
+    color: '#030303ff',
     marginBottom: 5,
   },
   priceContainer: {
@@ -527,7 +587,7 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#232F3E',
+    color: '#000000ff',
     marginBottom: 5,
     height: 35,
   },
@@ -576,7 +636,7 @@ const styles = StyleSheet.create({
   },
   gridText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     textAlign: 'left',
   },
