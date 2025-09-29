@@ -8,13 +8,13 @@ import {
   FlatList,
   Dimensions,
   ActivityIndicator,
-  SafeAreaView,
   StatusBar,
   Alert,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { fetchProductsByCollection, fetchCollectionByHandle } from '../shopifyApi';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Header from '../components/Header';
 const { width } = Dimensions.get('window');
 
 const CollectionScreen = () => {
@@ -27,7 +27,6 @@ const CollectionScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // ✅ Pagination states
   const [endCursor, setEndCursor] = useState(null);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -42,7 +41,7 @@ const CollectionScreen = () => {
 
       const [collectionData, productData] = await Promise.all([
         fetchCollectionByHandle(handle),
-        fetchProductsByCollection(handle, 10) // ✅ first 10 only
+        fetchProductsByCollection(handle, 10)
       ]);
 
       setCollectionInfo(collectionData);
@@ -96,7 +95,11 @@ const CollectionScreen = () => {
     <TouchableOpacity 
       style={styles.productItem}
       onPress={() => {
-        console.log("Navigate to product:", item.name, item.id);
+        // ✅ Navigate to Product Detail Screen
+        navigation.navigate('ProductDetail', {
+          productId: item.id,
+          productName: item.name
+        });
       }}
       activeOpacity={0.8}
     >
@@ -162,7 +165,7 @@ const CollectionScreen = () => {
             onPress={loadMoreProducts} 
             style={{ backgroundColor: '#da4925ff', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 6 }}
           >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Read More</Text>
+            <Text style={{ color: '#fff', fontWeight: '600' }}>Load More</Text>
           </TouchableOpacity>
         )}
       </View>

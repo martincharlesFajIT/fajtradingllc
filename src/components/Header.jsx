@@ -9,7 +9,8 @@ import {
   Modal,
   FlatList,
   Dimensions,
-  Linking, // Import Linking for opening URLs
+  Linking,
+  Animated,
 } from 'react-native';
 
 // Adjust path if necessary. Now importing fetchMenuByHandle
@@ -19,9 +20,10 @@ const { width } = Dimensions.get('window');
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [menuItems, setMenuItems] = useState([]); // This will now hold actual menu links
+  const [menuItems, setMenuItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [slideAnim] = useState(new Animated.Value(-width * 0.75));
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -32,7 +34,7 @@ const Header = () => {
         if (shopifyMenuLinks) {
           setMenuItems(shopifyMenuLinks);
         } else {
-          setMenuItems([]); // Ensure it's an empty array if null is returned
+          setMenuItems([]);
           setError("No menu found with handle 'all' or no items in it.");
         }
       } catch (err) {
@@ -46,29 +48,40 @@ const Header = () => {
     loadMenuItems();
   }, []); 
 
+  // Animate menu open/close
+  useEffect(() => {
+    if (isMenuOpen) {
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(slideAnim, {
+        toValue: -width * 0.75,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isMenuOpen, slideAnim]);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const handleMenuItemPress = (item) => {
     if (item.url) {
-      // You'll need more advanced logic here if you want to navigate
-      // within your app for certain URLs (e.g., /products, /collections)
-      // For now, it will open external links or do nothing for internal ones.
       if (item.url.startsWith('http://') || item.url.startsWith('https://')) {
         Linking.openURL(item.url);
       } else {
-        // Handle internal app navigation if needed, e.g.,
-        // navigate('ProductScreen', { productId: item.url.split('/').pop() });
         console.log("Internal link pressed:", item.url);
       }
     }
-    toggleMenu(); // Close menu after item is pressed
+    toggleMenu();
   };
 
   return (
     <View style={styles.container}>
-      {/* Top section with menu button, logo and cart */}
       <View style={styles.topSection}>
         {/* Menu Toggle Button */}
         <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
@@ -108,51 +121,67 @@ const Header = () => {
         <Text style={styles.dropdownIcon}>▼</Text>
       </View>
 
-      {/* Toggle Menu */}
+      {/* Side Menu Modal */}
       <Modal
-        animationType="slide"
+        animationType="none"
         transparent={true}
         visible={isMenuOpen}
         onRequestClose={toggleMenu}
       >
-        <TouchableOpacity
-          style={styles.menuOverlay}
-          activeOpacity={1}
-          onPressOut={toggleMenu}
-        >
-          <View style={styles.menuContainer}>
-            <TouchableOpacity onPress={toggleMenu} style={styles.closeMenuButton}>
-              <Text style={styles.closeMenuIcon}>✕</Text>
-            </TouchableOpacity>
-            <Text style={styles.menuTitle}>Menu</Text> {/* Changed title from "All Products" */}
-            {isLoading ? (
-              <Text style={styles.menuLoadingText}>Loading menu links...</Text>
-            ) : error ? (
-              <Text style={styles.menuErrorText}>{error}</Text>
-            ) : menuItems.length > 0 ? (
-              <FlatList
-                data={menuItems}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.menuItem}
-                    onPress={() => handleMenuItemPress(item)} // Handle press
-                  >
-                    <Text style={styles.menuItemText}>{item.title}</Text> {/* Display item.title */}
-                  </TouchableOpacity>
-                )}
-              />
-            ) : (
-              <Text style={styles.menuNoItemsText}>No items found in the 'All' menu.</Text>
-            )}
-          </View>
-        </TouchableOpacity>
+        <View style={styles.menuOverlay}>
+          <TouchableOpacity
+            style={styles.overlayBackground}
+            activeOpacity={1}
+            onPress={toggleMenu}
+          />
+          
+          {/* Animated Menu Container */}
+          <Animated.View
+            style={[
+              styles.menuContainer,
+              {
+                transform: [{ translateX: slideAnim }],
+              },
+            ]}
+          >
+            <View style={styles.menuHeader}>
+              <Text style={styles.menuTitle}>Menu</Text>
+              <TouchableOpacity onPress={toggleMenu} style={styles.closeMenuButton}>
+                <Text style={styles.closeMenuIcon}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.menuContent}>
+              {isLoading ? (
+                <Text style={styles.menuLoadingText}>Loading menu links...</Text>
+              ) : error ? (
+                <Text style={styles.menuErrorText}>{error}</Text>
+              ) : menuItems.length > 0 ? (
+                <FlatList
+                  data={menuItems}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.menuItem}
+                      onPress={() => handleMenuItemPress(item)}
+                    >
+                      <Text style={styles.menuItemText}>{item.title}</Text>
+                      <Text style={styles.menuItemArrow}>›</Text>
+                    </TouchableOpacity>
+                  )}
+                  showsVerticalScrollIndicator={false}
+                />
+              ) : (
+                <Text style={styles.menuNoItemsText}>No items found in the 'All' menu.</Text>
+              )}
+            </View>
+          </Animated.View>
+        </View>
       </Modal>
     </View>
   );
 };
 
-// Styles remain the same, no changes needed for styles.
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#232F3E',
@@ -258,18 +287,22 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
   },
+  
   menuOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
+    flexDirection: 'row',
+  },
+  overlayBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   menuContainer: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
     width: width * 0.75,
-    height: '100%',
     backgroundColor: '#FFFFFF',
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
-    paddingHorizontal: 15,
     shadowColor: '#000',
     shadowOffset: {
       width: 2,
@@ -279,29 +312,49 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  closeMenuButton: {
-    alignSelf: 'flex-end',
-    padding: 10,
-    marginBottom: 20,
-  },
-  closeMenuIcon: {
-    fontSize: 24,
-    color: '#333',
+  menuHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingHorizontal: 15,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   menuTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
     color: '#333',
   },
+  closeMenuButton: {
+    padding: 10,
+  },
+  closeMenuIcon: {
+    fontSize: 20,
+    color: '#333',
+  },
+  menuContent: {
+    flex: 1,
+    paddingHorizontal: 15,
+  },
   menuItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   menuItemText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#333',
+    flex: 1,
+  },
+  menuItemArrow: {
+    fontSize: 18,
+    color: '#999',
+    marginLeft: 10,
   },
   menuLoadingText: {
     fontSize: 16,

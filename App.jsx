@@ -7,11 +7,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomePage from './src/screens/HomePage';
 import CollectionScreen from './src/screens/CollectionScreen';
-
+import ProductDetailScreen from './src/screens/ProductDetailScreen';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
+     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Home"
           screenOptions={{
@@ -20,8 +22,10 @@ const App = () => {
         >
           <Stack.Screen name="Home" component={HomePage}/>
           <Stack.Screen name="CollectionProducts" component={CollectionScreen}/>
+          <Stack.Screen name="ProductDetail" component={ProductDetailScreen}/>
         </Stack.Navigator>
       </NavigationContainer>
+      </SafeAreaProvider>
   );
 };
 

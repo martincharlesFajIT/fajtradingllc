@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   ScrollView,
   View,
@@ -18,6 +18,8 @@ const { width } = Dimensions.get('window');
 
 const HomePage = () => {
   const navigation = useNavigation();
+  const bannerRef = useRef(null);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   // Single state for all collections
   const [collections, setCollections] = useState({});
@@ -84,7 +86,7 @@ const HomePage = () => {
     const loadCoffeeMachines = async () => {
       try {
         const products = await fetchProductsByCollection("professional-coffee-machines");
-        setCoffeeMachines(products);
+        setCoffeeMachines(products.products || products); // Handle both old and new API response
       } catch (error) {
         console.error("Error fetching coffee machine products:", error);
       } finally {
@@ -94,7 +96,6 @@ const HomePage = () => {
     loadCoffeeMachines();
   }, []);
 
-  
   useEffect(() => {
     Object.entries(COLLECTION_GROUPS).forEach(([groupKey, group]) => {
       loadCollections(groupKey, group.handles);
@@ -104,8 +105,38 @@ const HomePage = () => {
   const bannerData = [
     { id: 1, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcK6Z2RB7mrb6haKMoFcmz_6JyFaK7r1m5Wg&s' },
     { id: 2, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcK6Z2RB7mrb6haKMoFcmz_6JyFaK7r1m5Wg&s' },
-    { id: 3, image: 'https://via.placeholder.com/400x200/FF9900/FFFFFF?text=Free+Delivery' },
+    { id: 3, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcK6Z2RB7mrb6haKMoFcmz_6JyFaK7r1m5Wg&s' },
   ];
+
+  // Auto-slide effect for banner
+  useEffect(() => {
+    if (bannerData.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentBannerIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % bannerData.length;
+        
+        // Scroll to next banner
+        if (bannerRef.current) {
+          bannerRef.current.scrollToIndex({
+            index: nextIndex,
+            animated: true,
+          });
+        }
+        
+        return nextIndex;
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [bannerData.length]);
+
+  // Handle manual scroll
+  const handleBannerScroll = (event) => {
+    const contentOffset = event.nativeEvent.contentOffset.x;
+    const index = Math.round(contentOffset / (width - 20));
+    setCurrentBannerIndex(index);
+  };
 
   const categories = [
     { id: 1, name: 'Coffee Machine', image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_82110317-e2b4-47b5-8395-54aade9aaf0f_200x200.jpg?v=1746439090' },
@@ -123,7 +154,7 @@ const HomePage = () => {
     { id: 3, name: 'Coffee Maker', salePrice: '$89.99', image: 'https://cumuluscoffee.com/cdn/shop/files/image6344284.jpg?v=1750178201&width=2475', discount: '40%' },
   ];
 
-    const shopsave = [
+  const shopsave = [
     { id: 1, name: 'How to get free deliveries', image: 'https://img.freepik.com/premium-photo/delivery-man-red-uniform-holding-phone-with-blank-screen-custom-app-promotion-branding_1267867-19074.jpg?w=360'},
     { id: 2, name: 'How to Return an items',  image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNORpbLTSRP4WB99TmvnQ3aLCAKxlkruStYZeWJ_IeVIFbWAQnBWG4tTzZaLWH09GG4yc&usqp=CAU'},
     { id: 3, name: 'How to contact us',  image: 'https://img.freepik.com/premium-photo/delivery-man-red-uniform-holding-phone-with-blank-screen-custom-app-promotion-branding_1267867-19062.jpg?w=360'},
@@ -138,7 +169,6 @@ const HomePage = () => {
     { id: 3, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Coffee', discount: '40%' },
   ];
 
-  
   const CollectionGrid = ({ groupKey, title }) => {
     const groupCollections = collections[groupKey] || [];
     const isLoading = loading[groupKey];
@@ -165,11 +195,11 @@ const HomePage = () => {
                 key={`${groupKey}-${item.id}`}
                 style={styles.gridItem}
                 onPress={() => {
-                console.log("Navigate to collection:", item.title, item.handle);
-                navigation.navigate('CollectionProducts', { 
-                handle: item.handle, 
-                title: item.title 
-                });
+                  console.log("Navigate to collection:", item.title, item.handle);
+                  navigation.navigate('CollectionProducts', { 
+                    handle: item.handle, 
+                    title: item.title 
+                  });
                 }}
               >
                 <Image
@@ -279,6 +309,7 @@ const HomePage = () => {
         {/* Banner Carousel */}
         <View style={styles.section}>
           <FlatList
+            ref={bannerRef}
             data={bannerData}
             renderItem={renderBanner}
             keyExtractor={(item) => item.id.toString()}
@@ -287,7 +318,29 @@ const HomePage = () => {
             pagingEnabled
             snapToInterval={width - 20}
             decelerationRate="fast"
+            onMomentumScrollEnd={handleBannerScroll}
+            onScrollToIndexFailed={(info) => {
+              // Handle scroll failure gracefully
+              console.log('Banner scroll failed:', info);
+            }}
           />
+          
+          {/* Banner Indicators */}
+          <View style={styles.bannerIndicators}>
+            {bannerData.map((_, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.indicator,
+                  currentBannerIndex === index && styles.activeIndicator
+                ]}
+                onPress={() => {
+                  setCurrentBannerIndex(index);
+                  bannerRef.current?.scrollToIndex({ index, animated: true });
+                }}
+              />
+            ))}
+          </View>
         </View>
 
         {/* Categories */}
@@ -339,13 +392,10 @@ const HomePage = () => {
           />
         </View>
 
-       
-
         {/* Dynamic Collection Grids */}
-
         <CollectionGrid groupKey="featured" title="Coffee Machines" />
 
-         {/* Featured by Partners */}
+         {/* Get Discount on Coffee machine */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Get Discount on Coffee machine</Text>
@@ -362,16 +412,14 @@ const HomePage = () => {
             contentContainerStyle={styles.dealsContainer}
           />
         </View>
+        
         <CollectionGrid groupKey="homeAppliances" title="Home Appliances" />
         <CollectionGrid groupKey="Electronics" title="Electronics" />
 
         {/* Save and Shop Slider */}
-          <View style={styles.section}>
+        <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Shop & save on FAJ Tradding LLC</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
-            </TouchableOpacity>
           </View>
           <FlatList
             data={shopsave}
@@ -382,35 +430,6 @@ const HomePage = () => {
             contentContainerStyle={styles.dealsContainer}
           />
         </View>
-
-        {/* <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Discover Product for you</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
-            </TouchableOpacity>
-          </View>
-
-          {loadingCoffee ? (
-            <ActivityIndicator size="large" color="#000" style={{ marginVertical: 20 }} />
-          ) : coffeeMachines.length === 0 ? (
-            <Text style={{ textAlign: "center", marginVertical: 20 }}>
-              No products found.
-            </Text>
-          ) : (
-            <FlatList
-              data={coffeeMachines}
-              renderItem={renderProduct}
-              keyExtractor={(item) => item.id}
-              numColumns={2}
-              scrollEnabled={false}
-              contentContainerStyle={styles.productsGrid}
-            />
-          )}
-        </View> */}
-
-          
-        
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </View>
@@ -457,6 +476,25 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 8,
     resizeMode: 'cover',
+  },
+  bannerIndicators: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 15,
+    paddingHorizontal: 15,
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#C4C4C4',
+    marginHorizontal: 4,
+  },
+  activeIndicator: {
+    backgroundColor: '#da4925ff',
+    width: 20,
+    borderRadius: 4,
   },
 
   // Category Styles
