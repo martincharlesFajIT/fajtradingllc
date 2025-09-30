@@ -111,25 +111,25 @@ export async function fetchCollectionByHandle(handle) {
     }
 
     const result = await response.json();
-    
+
     if (result.errors) {
       console.error("GraphQL errors:", result.errors);
       return null;
     }
-    
+
     const collection = result.data?.collectionByHandle;
     if (!collection) {
       console.log("Collection not found:", handle);
       return null;
     }
-    
+
     return {
       id: collection.id,
       title: collection.title,
       handle: collection.handle,
       image: collection.image?.url || null,
     };
-    
+
   } catch (error) {
     console.error("Error fetching collection:", handle, error);
     return null;
@@ -239,6 +239,12 @@ export async function fetchProductById(productId) {
             }
           }
         }
+        shortDescription: metafield(namespace: "custom", key: "short_description") {
+          value
+        }
+        brand: metafield(namespace: "custom", key: "brand") {
+          value
+        }
       }
     }
   `;
@@ -261,18 +267,18 @@ export async function fetchProductById(productId) {
     }
 
     const result = await response.json();
-    
+
     if (result.errors) {
       console.error("GraphQL errors:", result.errors);
       return null;
     }
-    
+
     const product = result.data?.product;
     if (!product) {
       console.log("Product not found:", productId);
       return null;
     }
-    
+
     return {
       id: product.id,
       title: product.title,
@@ -295,9 +301,21 @@ export async function fetchProductById(productId) {
         selectedOptions: edge.node.selectedOptions,
         taxable: edge.node.taxable,
       })),
-      shortDescription: '', // We'll add this back once metafields work
+
+     shortDescription: product.shortDescription?.value || '',
+
+      brand: (() => {
+        try {
+          const val = product.brand?.value;
+          if (!val) return '';
+          const parsed = JSON.parse(val);
+          return Array.isArray(parsed) ? parsed[0] : parsed;
+        } catch {
+          return product.brand?.value || '';
+        }
+      })(),
     };
-    
+
   } catch (error) {
     console.error("Error fetching product:", productId, error);
     return null;

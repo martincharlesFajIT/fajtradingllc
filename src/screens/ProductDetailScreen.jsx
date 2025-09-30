@@ -8,15 +8,13 @@ import {
   ScrollView,
   Dimensions,
   ActivityIndicator,
+  SafeAreaView,
   StatusBar,
   Alert,
   Modal,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { fetchProductById } from '../shopifyApi';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../components/Header';
-
 
 const { width } = Dimensions.get('window');
 
@@ -36,6 +34,7 @@ const ProductDetailScreen = () => {
   const [quantity, setQuantity] = useState(1);
   const [expandedSection, setExpandedSection] = useState(null);
   const [showQuantityModal, setShowQuantityModal] = useState(false);
+  const [showReturnPolicy, setShowReturnPolicy] = useState(false);
 
   // Format price with commas
   const formatPrice = (amount) => {
@@ -137,9 +136,7 @@ const ProductDetailScreen = () => {
 
   if (loading) {
     return (
-        
       <SafeAreaView style={styles.container}>
-        
         <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
         <View style={styles.headerBar}>
           <TouchableOpacity 
@@ -174,7 +171,18 @@ const ProductDetailScreen = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
-      <Header />
+      <View style={styles.headerBar}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>←</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle} numberOfLines={1}>
+          {product.title}
+        </Text>
+        <View style={styles.headerRight} />
+      </View>
 
       <ScrollView 
         style={styles.scrollView}
@@ -246,8 +254,11 @@ const ProductDetailScreen = () => {
         <View style={styles.infoSection}>
           <Text style={styles.productTitle}>{product.title}</Text>
           
-          {product.vendor && (
-            <Text style={styles.vendor}>by {product.vendor}</Text>
+          {/* Show Brand if available from metafield, otherwise show vendor */}
+          {(product.vendor || product.vendor) && (
+            <Text style={styles.vendor}>
+              by {product.vendor || product.vendor}
+            </Text>
           )}
 
           {/* Price Section */}
@@ -271,10 +282,15 @@ const ProductDetailScreen = () => {
                 )}
               </View>
 
-              {/* Free Return Badge */}
-              <View style={styles.freeReturnContainer}>
+              {/* Free Return Badge - Clickable */}
+              <TouchableOpacity 
+                style={styles.freeReturnContainer}
+                onPress={() => setShowReturnPolicy(true)}
+                activeOpacity={0.7}
+              >
                 <Text style={styles.freeReturnText}>✓ Free Return</Text>
-              </View>
+                <Text style={styles.freeReturnIcon}>ℹ️</Text>
+              </TouchableOpacity>
 
               {/* VAT Information */}
               {currentVariant.taxable && (
@@ -356,6 +372,26 @@ const ProductDetailScreen = () => {
           {/* Product Details Accordion */}
           <View style={styles.accordionSection}>
             <Text style={styles.mainSectionTitle}>Product Details</Text>
+
+            {/* Brand */}
+            {product.brand && (
+              <View style={styles.accordionItem}>
+                <TouchableOpacity
+                  style={styles.accordionHeader}
+                  onPress={() => toggleSection('brand')}
+                >
+                  <Text style={styles.accordionTitle}>Brand</Text>
+                  <Text style={styles.accordionIcon}>
+                    {expandedSection === 'brand' ? '−' : '+'}
+                  </Text>
+                </TouchableOpacity>
+                {expandedSection === 'brand' && (
+                  <View style={styles.accordionContent}>
+                    <Text style={styles.accordionText}>{product.brand}</Text>
+                  </View>
+                )}
+              </View>
+            )}
 
             {/* Short Description */}
             {product.shortDescription && (
@@ -530,6 +566,70 @@ const ProductDetailScreen = () => {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {/* Return Policy Modal */}
+      <Modal
+        visible={showReturnPolicy}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowReturnPolicy(false)}
+      >
+        <TouchableOpacity
+          style={styles.policyModalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowReturnPolicy(false)}
+        >
+          <View style={styles.policyModalContent}>
+            <View style={styles.policyHeader}>
+              <Text style={styles.policyTitle}>Return Policy</Text>
+              <TouchableOpacity onPress={() => setShowReturnPolicy(false)}>
+                <Text style={styles.policyClose}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.policyBody}>
+              <Text style={styles.policyText}>
+                <Text style={styles.policyBold}>Free Returns Within 30 Days</Text>
+                {'\n\n'}
+                We offer free returns on all eligible products within 30 days of delivery. 
+                {'\n\n'}
+                <Text style={styles.policyBold}>Return Conditions:</Text>
+                {'\n'}
+                • Product must be unused and in original packaging
+                {'\n'}
+                • All tags and labels must be intact
+                {'\n'}
+                • Original receipt or proof of purchase required
+                {'\n\n'}
+                <Text style={styles.policyBold}>How to Return:</Text>
+                {'\n'}
+                1. Contact our customer service team
+                {'\n'}
+                2. Pack the item securely in its original packaging
+                {'\n'}
+                3. We'll arrange a free pickup from your location
+                {'\n'}
+                4. Refund will be processed within 5-7 business days
+                {'\n\n'}
+                <Text style={styles.policyBold}>Exclusions:</Text>
+                {'\n'}
+                • Damaged or modified products
+                {'\n'}
+                • Products without original packaging
+                {'\n'}
+                • Sale or clearance items (unless defective)
+                {'\n\n'}
+                For more information, please contact our customer service team.
+              </Text>
+            </ScrollView>
+            <TouchableOpacity 
+              style={styles.policyButton}
+              onPress={() => setShowReturnPolicy(false)}
+            >
+              <Text style={styles.policyButtonText}>Got it</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -584,8 +684,14 @@ const styles = StyleSheet.create({
   comparePrice: { fontSize: 20, color: '#999', textDecorationLine: 'line-through', marginRight: 10 },
   discountBadge: { backgroundColor: '#da4925ff', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
   discountText: { color: '#FFFFFF', fontSize: 12, fontWeight: 'bold' },
-  freeReturnContainer: { marginBottom: 8 },
-  freeReturnText: { fontSize: 14, color: '#2E7D32', fontWeight: '600' },
+  freeReturnContainer: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginBottom: 8,
+    paddingVertical: 4,
+  },
+  freeReturnText: { fontSize: 14, color: '#2E7D32', fontWeight: '600', marginRight: 5 },
+  freeReturnIcon: { fontSize: 14 },
   vatContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
   vatLabel: { fontSize: 14, color: '#666', fontWeight: '600' },
   vatAmount: { fontSize: 14, color: '#666' },
@@ -720,6 +826,59 @@ const styles = StyleSheet.create({
   quantityOptionText: { fontSize: 16, color: '#232F3E' },
   quantityOptionTextSelected: { color: '#da4925ff', fontWeight: 'bold' },
   checkMark: { fontSize: 18, color: '#da4925ff', fontWeight: 'bold' },
+  policyModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  policyModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    width: '100%',
+    maxHeight: '80%',
+    overflow: 'hidden',
+  },
+  policyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+    backgroundColor: '#F8F8F8',
+  },
+  policyTitle: { fontSize: 20, fontWeight: 'bold', color: '#232F3E' },
+  policyClose: { fontSize: 28, color: '#666', fontWeight: 'bold' },
+  policyBody: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  policyText: {
+    fontSize: 15,
+    color: '#666',
+    lineHeight: 24,
+  },
+  policyBold: {
+    fontWeight: 'bold',
+    color: '#232F3E',
+    fontSize: 16,
+  },
+  policyButton: {
+    backgroundColor: '#da4925ff',
+    marginHorizontal: 20,
+    marginVertical: 15,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  policyButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
 
 export default ProductDetailScreen;
