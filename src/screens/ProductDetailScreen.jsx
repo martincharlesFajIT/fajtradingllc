@@ -84,10 +84,20 @@ const ProductDetailScreen = () => {
 
   const handleAddToCart = () => {
     const variant = product.variants[selectedVariant];
+    
+    // Here you would normally add to your cart state/context
+    // For now, we'll just navigate to cart screen
+    
     Alert.alert(
-      'Add to Cart',
-      `Added ${quantity} x ${product.title} to cart\nPrice: ${formatPrice(variant.price.amount)} ${variant.price.currencyCode}`,
-      [{ text: 'OK' }]
+      'Added to Cart',
+      `${quantity} x ${product.title} added to cart`,
+      [
+        { text: 'Continue Shopping', style: 'cancel' },
+        { 
+          text: 'View Cart', 
+          onPress: () => navigation.navigate('Cart')
+        }
+      ]
     );
   };
 
@@ -255,9 +265,9 @@ const ProductDetailScreen = () => {
           <Text style={styles.productTitle}>{product.title}</Text>
           
           {/* Show Brand if available from metafield, otherwise show vendor */}
-          {(product.vendor || product.vendor) && (
+          {(product.brand || product.vendor) && (
             <Text style={styles.vendor}>
-              by {product.vendor || product.vendor}
+              by {product.brand || product.vendor}
             </Text>
           )}
 
