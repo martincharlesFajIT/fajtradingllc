@@ -10,38 +10,22 @@ import {
   StatusBar,
   Alert,
   Modal,
-  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useCart } from '../context/CartContext';
 
 const CartScreen = () => {
   const navigation = useNavigation();
+  const { 
+    cartItems, 
+    removeFromCart, 
+    updateQuantity, 
+    clearCart,
+    getSubtotal,
+    getVAT,
+    getTotal,
+  } = useCart();
   
-  const [cartItems, setCartItems] = useState([
-    {
-      id: '1',
-      productId: 'gid://shopify/Product/123',
-      name: 'Faema E98UP A/2 Groups Espresso Machine',
-      image: 'https://via.placeholder.com/150',
-      price: 1938.00,
-      currency: 'AED',
-      quantity: 1,
-      variant: 'Standard',
-      inStock: true,
-    },
-    {
-      id: '2',
-      productId: 'gid://shopify/Product/456',
-      name: 'Professional Coffee Grinder',
-      image: 'https://via.placeholder.com/150',
-      price: 450.00,
-      currency: 'AED',
-      quantity: 2,
-      variant: 'Black',
-      inStock: true,
-    },
-  ]);
-
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Format price with commas
@@ -49,34 +33,8 @@ const CartScreen = () => {
     return amount.toLocaleString('en-US', { maximumFractionDigits: 2 });
   };
 
-  // Calculate subtotal
-  const calculateSubtotal = () => {
-    return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  };
-
-  // Calculate VAT (5%)
-  const calculateVAT = () => {
-    return calculateSubtotal() * 0.05;
-  };
-
-  // Calculate total
-  const calculateTotal = () => {
-    return calculateSubtotal() + calculateVAT();
-  };
-
-  // Update quantity
-  const updateQuantity = (itemId, newQuantity) => {
-    if (newQuantity < 1) return;
-    
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  // Remove item
-  const removeItem = (itemId) => {
+  // Remove item with confirmation
+  const handleRemoveItem = (itemId) => {
     Alert.alert(
       'Remove Item',
       'Are you sure you want to remove this item from cart?',
@@ -85,17 +43,15 @@ const CartScreen = () => {
         {
           text: 'Remove',
           style: 'destructive',
-          onPress: () => {
-            setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
-          }
+          onPress: () => removeFromCart(itemId)
         }
       ]
     );
   };
 
-  // Clear cart
-  const clearCart = () => {
-    setCartItems([]);
+  // Clear cart with confirmation
+  const handleClearCart = () => {
+    clearCart();
     setShowClearConfirm(false);
   };
 
@@ -106,14 +62,8 @@ const CartScreen = () => {
       return;
     }
     
-    Alert.alert(
-      'Checkout',
-      `Proceed to checkout with ${cartItems.length} items?\nTotal: ${formatPrice(calculateTotal())} AED`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Proceed', onPress: () => console.log('Proceed to checkout') }
-      ]
-    );
+    // Navigate to checkout screen
+    navigation.navigate('Checkout');
   };
 
   const renderCartItem = ({ item }) => (
@@ -150,7 +100,7 @@ const CartScreen = () => {
       <View style={styles.itemRight}>
         <TouchableOpacity
           style={styles.removeButton}
-          onPress={() => removeItem(item.id)}
+          onPress={() => handleRemoveItem(item.id)}
         >
           <Text style={styles.removeButtonText}>✕</Text>
         </TouchableOpacity>
@@ -199,6 +149,7 @@ const CartScreen = () => {
             <Text style={styles.clearButtonText}>Clear</Text>
           </TouchableOpacity>
         )}
+        {cartItems.length === 0 && <View style={styles.headerRight} />}
       </View>
 
       {cartItems.length === 0 ? (
@@ -219,14 +170,14 @@ const CartScreen = () => {
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Subtotal</Text>
               <Text style={styles.summaryValue}>
-                {formatPrice(calculateSubtotal())} AED
+                {formatPrice(getSubtotal())} AED
               </Text>
             </View>
             
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>VAT (5%)</Text>
               <Text style={styles.summaryValue}>
-                {formatPrice(calculateVAT())} AED
+                {formatPrice(getVAT())} AED
               </Text>
             </View>
             
@@ -235,7 +186,7 @@ const CartScreen = () => {
             <View style={styles.summaryRow}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={styles.totalValue}>
-                {formatPrice(calculateTotal())} AED
+                {formatPrice(getTotal())} AED
               </Text>
             </View>
 
@@ -286,7 +237,7 @@ const CartScreen = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalConfirmButton}
-                onPress={clearCart}
+                onPress={handleClearCart}
               >
                 <Text style={styles.modalConfirmText}>Clear Cart</Text>
               </TouchableOpacity>
@@ -330,6 +281,9 @@ const styles = StyleSheet.create({
     color: '#232F3E',
     flex: 1,
     textAlign: 'center',
+  },
+  headerRight: {
+    width: 40,
   },
   clearButton: {
     paddingHorizontal: 10,

@@ -111,25 +111,25 @@ export async function fetchCollectionByHandle(handle) {
     }
 
     const result = await response.json();
-
+    
     if (result.errors) {
       console.error("GraphQL errors:", result.errors);
       return null;
     }
-
+    
     const collection = result.data?.collectionByHandle;
     if (!collection) {
       console.log("Collection not found:", handle);
       return null;
     }
-
+    
     return {
       id: collection.id,
       title: collection.title,
       handle: collection.handle,
       image: collection.image?.url || null,
     };
-
+    
   } catch (error) {
     console.error("Error fetching collection:", handle, error);
     return null;
@@ -267,18 +267,76 @@ export async function fetchProductById(productId) {
     }
 
     const result = await response.json();
-
+    
     if (result.errors) {
       console.error("GraphQL errors:", result.errors);
       return null;
     }
-
+    
     const product = result.data?.product;
     if (!product) {
       console.log("Product not found:", productId);
       return null;
     }
 
+    // Helper function to parse metafield value
+    const parseMetafieldValue = (metafield) => {
+      if (!metafield || !metafield.value) return '';
+      
+      let value = metafield.value;
+      
+      // If it's a string, try to parse it
+      if (typeof value === 'string') {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          // Not JSON, return as plain string
+          return value;
+        }
+      }
+      
+      // Handle array (like ['fom'])
+      if (Array.isArray(value)) {
+        return value.join(', ');
+      }
+      
+      // Handle rich text object (Shopify's rich text format)
+      if (value && typeof value === 'object') {
+        // If it has a children array (rich text format)
+        if (value.children && Array.isArray(value.children)) {
+          return extractTextFromRichText(value);
+        }
+        
+        // If it has a value property
+        if (value.value) {
+          return parseMetafieldValue({ value: value.value });
+        }
+      }
+      
+      // Return as string if nothing else works
+      return String(value);
+    };
+
+    // Extract plain text from Shopify's rich text format
+    const extractTextFromRichText = (node) => {
+      if (!node) return '';
+      
+      // If it's a text node
+      if (node.type === 'text' && node.value) {
+        return node.value;
+      }
+      
+      
+      if (node.children && Array.isArray(node.children)) {
+        return node.children
+          .map(child => extractTextFromRichText(child))
+          .filter(text => text)
+          .join(' ');
+      }
+      
+      return '';
+    };
+    
     return {
       id: product.id,
       title: product.title,
@@ -301,21 +359,10 @@ export async function fetchProductById(productId) {
         selectedOptions: edge.node.selectedOptions,
         taxable: edge.node.taxable,
       })),
-
-     shortDescription: product.shortDescription?.value || '',
-
-      brand: (() => {
-        try {
-          const val = product.brand?.value;
-          if (!val) return '';
-          const parsed = JSON.parse(val);
-          return Array.isArray(parsed) ? parsed[0] : parsed;
-        } catch {
-          return product.brand?.value || '';
-        }
-      })(),
+      shortDescription: parseMetafieldValue(product.shortDescription),
+      brand: parseMetafieldValue(product.brand),
     };
-
+    
   } catch (error) {
     console.error("Error fetching product:", productId, error);
     return null;

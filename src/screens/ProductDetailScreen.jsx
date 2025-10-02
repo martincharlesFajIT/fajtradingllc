@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { fetchProductById } from '../shopifyApi';
+import { useCart } from '../context/CartContext';
 
 const { width } = Dimensions.get('window');
 
@@ -26,6 +27,7 @@ const ProductDetailScreen = () => {
   const route = useRoute();
   const { productId, productName } = route.params;
   const scrollViewRef = useRef(null);
+  const { addToCart } = useCart();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -83,22 +85,11 @@ const ProductDetailScreen = () => {
   }, [productId]);
 
   const handleAddToCart = () => {
-    const variant = product.variants[selectedVariant];
+    // Add item to cart using context
+    addToCart(product, quantity, selectedVariant);
     
-    // Here you would normally add to your cart state/context
-    // For now, we'll just navigate to cart screen
-    
-    Alert.alert(
-      'Added to Cart',
-      `${quantity} x ${product.title} added to cart`,
-      [
-        { text: 'Continue Shopping', style: 'cancel' },
-        { 
-          text: 'View Cart', 
-          onPress: () => navigation.navigate('Cart')
-        }
-      ]
-    );
+    // Navigate directly to cart screen
+    navigation.navigate('Cart');
   };
 
   const handleBuyNow = () => {

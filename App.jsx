@@ -9,11 +9,14 @@ import HomePage from './src/screens/HomePage';
 import CollectionScreen from './src/screens/CollectionScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import CartScreen from './src/screens/CartScreen';
+import CheckoutScreen from './src/screens/CheckoutScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { CartProvider } from './src/context/CartContext';
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
+    <CartProvider>
      <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Home"
@@ -24,10 +27,13 @@ const App = () => {
           <Stack.Screen name="Home" component={HomePage}/>
           <Stack.Screen name="CollectionProducts" component={CollectionScreen}/>
           <Stack.Screen name="ProductDetail" component={ProductDetailScreen}/>
-          <Stack.Screen name="Cart" component={CartScreen}/>
+          <Stack.Screen name="Cart" component={CartScreen} options={{ headerShown: false }}/>
+          <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
       </NavigationContainer>
+      
       </SafeAreaProvider>
+      </CartProvider>
   );
 };
 
