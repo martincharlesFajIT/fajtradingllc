@@ -20,7 +20,7 @@ import { useCart } from '../context/CartContext';
 const { width } = Dimensions.get('window');
 
 // Default VAT percentage (you can change this or make it dynamic)
-const VAT_PERCENTAGE = 5; // 5% VAT for UAE
+const VAT_PERCENTAGE = 5; 
 
 const ProductDetailScreen = () => {
   const navigation = useNavigation();

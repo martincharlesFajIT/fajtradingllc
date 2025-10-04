@@ -148,6 +148,24 @@ export async function fetchMenuByHandle(handle) {
           title
           url
           type
+          items {
+            id
+            title
+            url
+            type
+            items {
+              id
+              title
+              url
+              type
+              items {
+                id
+                title
+                url
+                type
+              }
+            }
+          }
         }
       }
     }
@@ -183,12 +201,22 @@ export async function fetchMenuByHandle(handle) {
       return null;
     }
 
-    return menu.items.map(item => ({
-      id: item.id,
-      title: item.title,
-      url: item.url,
-      type: item.type,
-    }));
+    // Recursive function to process menu items at any depth
+    const processMenuItem = (item) => {
+      const hasChildren = item.items && item.items.length > 0;
+      
+      return {
+        id: item.id,
+        title: item.title,
+        url: item.url,
+        type: item.type,
+        hasChildren: hasChildren,
+        children: hasChildren ? item.items.map(child => processMenuItem(child)) : []
+      };
+    };
+
+    // Process all top-level menu items recursively
+    return menu.items.map(item => processMenuItem(item));
 
   } catch (error) {
     console.error("Error fetching menu:", handle, error);
@@ -196,7 +224,6 @@ export async function fetchMenuByHandle(handle) {
   }
 }
 
-// Fetch single product by ID with VAT and metafields
 export async function fetchProductById(productId) {
   const query = `
     query getProduct($id: ID!) {
@@ -290,17 +317,14 @@ export async function fetchProductById(productId) {
         try {
           value = JSON.parse(value);
         } catch (e) {
-          // Not JSON, return as plain string
           return value;
         }
       }
       
-      // Handle array (like ['fom'])
       if (Array.isArray(value)) {
         return value.join(', ');
       }
       
-      // Handle rich text object (Shopify's rich text format)
       if (value && typeof value === 'object') {
         // If it has a children array (rich text format)
         if (value.children && Array.isArray(value.children)) {
@@ -326,7 +350,7 @@ export async function fetchProductById(productId) {
         return node.value;
       }
       
-      
+      // If it has children, recursively extract text
       if (node.children && Array.isArray(node.children)) {
         return node.children
           .map(child => extractTextFromRichText(child))
@@ -365,6 +389,119 @@ export async function fetchProductById(productId) {
     
   } catch (error) {
     console.error("Error fetching product:", productId, error);
+    return null;
+  }
+}
+
+export async function createCheckout(lineItems, email = null) {
+  const query = `
+    mutation cartCreate($input: CartInput!) {
+      cartCreate(input: $input) {
+        cart {
+          id
+          checkoutUrl
+          totalQuantity
+          cost {
+            totalAmount {
+              amount
+              currencyCode
+            }
+            subtotalAmount {
+              amount
+              currencyCode
+            }
+          }
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  try {
+    console.log('=== CREATING CART ===');
+    console.log('Line Items:', JSON.stringify(lineItems, null, 2));
+    
+    // Transform line items to cart lines format
+    const cartLines = lineItems.map(item => ({
+      merchandiseId: item.variantId,
+      quantity: item.quantity,
+    }));
+
+    const input = {
+      lines: cartLines,
+    };
+
+    // Add buyer identity if email is provided
+    if (email) {
+      input.buyerIdentity = {
+        email: email
+      };
+    }
+
+    console.log('Cart Input:', JSON.stringify(input, null, 2));
+
+    const response = await fetch(SHOPIFY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_TOKEN,
+      },
+      body: JSON.stringify({
+        query,
+        variables: { input }
+      }),
+    });
+
+    console.log('Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('HTTP Error:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Cart Response:', JSON.stringify(result, null, 2));
+
+    // Check for errors
+    if (result.errors) {
+      console.error("GraphQL Errors:", result.errors);
+      return null;
+    }
+
+    // Check for user errors
+    if (result.data?.cartCreate?.userErrors?.length > 0) {
+      console.error("Cart User Errors:", result.data.cartCreate.userErrors);
+      return null;
+    }
+
+    const cart = result.data?.cartCreate?.cart;
+    
+    if (!cart || !cart.checkoutUrl) {
+      console.error("No cart or checkoutUrl returned");
+      return null;
+    }
+
+    console.log('✅ Cart Created Successfully!');
+    console.log('Cart ID:', cart.id);
+    console.log('Checkout URL:', cart.checkoutUrl);
+    console.log('=== END ===');
+
+
+    return {
+      id: cart.id,
+      webUrl: cart.checkoutUrl, // Map checkoutUrl to webUrl for compatibility
+      totalQuantity: cart.totalQuantity,
+      totalAmount: cart.cost?.totalAmount
+    };
+    
+  } catch (error) {
+    console.error("=== CART CREATE ERROR ===");
+    console.error("Error:", error.message);
+    console.error("=== END ERROR ===");
     return null;
   }
 }

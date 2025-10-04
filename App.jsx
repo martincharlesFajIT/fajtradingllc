@@ -8,6 +8,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomePage from './src/screens/HomePage';
 import CollectionScreen from './src/screens/CollectionScreen';
 import ProductDetailScreen from './src/screens/ProductDetailScreen';
+import OrderSuccessScreen from './src/screens/OrderSuccessScreen';
 import CartScreen from './src/screens/CartScreen';
 import CheckoutScreen from './src/screens/CheckoutScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -29,9 +30,9 @@ const App = () => {
           <Stack.Screen name="ProductDetail" component={ProductDetailScreen}/>
           <Stack.Screen name="Cart" component={CartScreen} options={{ headerShown: false }}/>
           <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen}/>
         </Stack.Navigator>
       </NavigationContainer>
-      
       </SafeAreaProvider>
       </CartProvider>
   );

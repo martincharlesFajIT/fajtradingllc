@@ -12,18 +12,29 @@ import {
   Linking,
   Animated,
 } from 'react-native';
-
-// Adjust path if necessary. Now importing fetchMenuByHandle
+import { useNavigation } from '@react-navigation/native';
+import { useCart } from '../context/CartContext';
 import { fetchMenuByHandle } from '../shopifyApi';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
 
 const Header = () => {
+  const navigation = useNavigation();
+  const { getCartCount } = useCart();
+  const cartCount = getCartCount();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [slideAnim] = useState(new Animated.Value(-width * 0.75));
+  const [location, setLocation] = useState('Loading...');
+  
+  // State for submenu
+  const [expandedItems, setExpandedItems] = useState({}); // Track which items are expanded
+  const [currentView, setCurrentView] = useState('main'); // 'main' or 'submenu'
+  const [currentSubmenu, setCurrentSubmenu] = useState(null);
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -39,7 +50,7 @@ const Header = () => {
         }
       } catch (err) {
         console.error("Failed to load menu items:", err);
-        setError("Failed to load menu items. Please check your Shopify API and menu handle.");
+        setError("Failed to load menu items.");
       } finally {
         setIsLoading(false);
       }
@@ -48,7 +59,32 @@ const Header = () => {
     loadMenuItems();
   }, []); 
 
-  // Animate menu open/close
+  useEffect(() => {
+    const detectLocation = async () => {
+      try {
+        const response = await fetch('http://ip-api.com/json/');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          if (data.city && data.country) {
+            setLocation(`${data.city}, ${data.country}`);
+          } else if (data.country) {
+            setLocation(data.country);
+          } else {
+            setLocation('Location unavailable');
+          }
+        } else {
+          setLocation('Pakistan');
+        }
+      } catch (error) {
+        console.error('Error detecting location:', error);
+        setLocation('Pakistan');
+      }
+    };
+
+    detectLocation();
+  }, []);
+
   useEffect(() => {
     if (isMenuOpen) {
       Animated.timing(slideAnim, {
@@ -67,58 +103,126 @@ const Header = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+    // Reset menu state when closing
+    if (isMenuOpen) {
+      setCurrentView('main');
+      setCurrentSubmenu(null);
+      setExpandedItems({});
+    }
   };
 
   const handleMenuItemPress = (item) => {
+    // If item has children, show submenu
+    if (item.hasChildren && item.children.length > 0) {
+      setCurrentView('submenu');
+      setCurrentSubmenu(item);
+    } else {
+      // No children, handle URL or navigation
+      handleUrlNavigation(item);
+    }
+  };
+
+  const handleUrlNavigation = (item) => {
     if (item.url) {
-      if (item.url.startsWith('http://') || item.url.startsWith('https://')) {
+      // Check if it's a collection URL
+      if (item.url.includes('/collections/')) {
+        // Extract collection handle from URL
+        const parts = item.url.split('/collections/');
+        if (parts.length > 1) {
+          const collectionHandle = parts[1].split('/')[0].split('?')[0];
+          console.log('Navigating to collection:', collectionHandle);
+          
+          // Navigate to your collection screen
+          // navigation.navigate('Collection', { handle: collectionHandle });
+          
+          // For now, just log it
+          console.log('Collection handle:', collectionHandle);
+        }
+        toggleMenu();
+      } else if (item.url.startsWith('http://') || item.url.startsWith('https://')) {
+        // External URL - open in browser
         Linking.openURL(item.url);
+        toggleMenu();
       } else {
+        // Internal URL - handle as needed
         console.log("Internal link pressed:", item.url);
+        toggleMenu();
       }
     }
-    toggleMenu();
   };
+
+  const handleBackToMain = () => {
+    setCurrentView('main');
+    setCurrentSubmenu(null);
+  };
+
+  const handleCartPress = () => {
+    navigation.navigate('Cart');
+  };
+
+  const renderMenuItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.menuItem}
+      onPress={() => handleMenuItemPress(item)}
+    >
+      <Text style={styles.menuItemText}>{item.title}</Text>
+      {item.hasChildren ? (
+        <Icon name="chevron-forward" size={20} color="#999" />
+      ) : (
+        <Icon name="chevron-forward" size={20} color="#ccc" />
+      )}
+    </TouchableOpacity>
+  );
+
+  const renderSubmenuItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.menuItem}
+      onPress={() => handleUrlNavigation(item)}
+    >
+      <Text style={styles.menuItemText}>{item.title}</Text>
+      <Icon name="chevron-forward" size={20} color="#ccc" />
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.topSection}>
-        {/* Menu Toggle Button */}
         <TouchableOpacity onPress={toggleMenu} style={styles.menuButton}>
-          <Text style={styles.menuIcon}>☰</Text>
+          <Icon name="menu" size={28} color="#FFFFFF" />
         </TouchableOpacity>
 
         <Text style={styles.logo}>FAJ TRADING LLC</Text>
+        
         <View style={styles.rightSection}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Text style={styles.icon}>🛒</Text>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>3</Text>
-            </View>
+          <TouchableOpacity style={styles.iconButton} onPress={handleCartPress}>
+            <Icon name="cart-outline" size={28} color="#FFFFFF" />
+            {cartCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{cartCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Search section */}
       <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search Amazon"
+            placeholder="Search products"
             placeholderTextColor="#666"
           />
           <TouchableOpacity style={styles.micButton}>
-            <Text style={styles.micIcon}>🎤</Text>
+            <Icon name="mic-outline" size={20} color="#666" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Location section */}
       <View style={styles.locationSection}>
-        <Text style={styles.locationIcon}>📍</Text>
-        <Text style={styles.locationText}>Deliver to Pakistan</Text>
-        <Text style={styles.dropdownIcon}>▼</Text>
+        <Icon name="location-sharp" size={16} color="#FFFFFF" style={styles.locationIcon} />
+        <Text style={styles.locationText}>Deliver to {location}</Text>
+        <Icon name="chevron-down" size={14} color="#FFFFFF" />
       </View>
 
       {/* Side Menu Modal */}
@@ -135,7 +239,6 @@ const Header = () => {
             onPress={toggleMenu}
           />
           
-          {/* Animated Menu Container */}
           <Animated.View
             style={[
               styles.menuContainer,
@@ -145,9 +248,18 @@ const Header = () => {
             ]}
           >
             <View style={styles.menuHeader}>
-              <Text style={styles.menuTitle}>Menu</Text>
+              {currentView === 'submenu' && (
+                <TouchableOpacity onPress={handleBackToMain} style={styles.backButton}>
+                  <Icon name="arrow-back" size={24} color="#333" />
+                </TouchableOpacity>
+              )}
+              <Text style={styles.menuTitle}>
+                {currentView === 'submenu' && currentSubmenu 
+                  ? currentSubmenu.title 
+                  : 'Menu'}
+              </Text>
               <TouchableOpacity onPress={toggleMenu} style={styles.closeMenuButton}>
-                <Text style={styles.closeMenuIcon}>✕</Text>
+                <Icon name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
             
@@ -156,23 +268,30 @@ const Header = () => {
                 <Text style={styles.menuLoadingText}>Loading menu links...</Text>
               ) : error ? (
                 <Text style={styles.menuErrorText}>{error}</Text>
-              ) : menuItems.length > 0 ? (
-                <FlatList
-                  data={menuItems}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={styles.menuItem}
-                      onPress={() => handleMenuItemPress(item)}
-                    >
-                      <Text style={styles.menuItemText}>{item.title}</Text>
-                      <Text style={styles.menuItemArrow}>›</Text>
-                    </TouchableOpacity>
-                  )}
-                  showsVerticalScrollIndicator={false}
-                />
+              ) : currentView === 'main' ? (
+                // Main menu
+                menuItems.length > 0 ? (
+                  <FlatList
+                    data={menuItems}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderMenuItem}
+                    showsVerticalScrollIndicator={false}
+                  />
+                ) : (
+                  <Text style={styles.menuNoItemsText}>No items found in menu.</Text>
+                )
               ) : (
-                <Text style={styles.menuNoItemsText}>No items found in the 'All' menu.</Text>
+                // Submenu
+                currentSubmenu && currentSubmenu.children.length > 0 ? (
+                  <FlatList
+                    data={currentSubmenu.children}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderSubmenuItem}
+                    showsVerticalScrollIndicator={false}
+                  />
+                ) : (
+                  <Text style={styles.menuNoItemsText}>No items in this category.</Text>
+                )
               )}
             </View>
           </Animated.View>
@@ -199,10 +318,6 @@ const styles = StyleSheet.create({
     padding: 5,
     marginRight: 10,
   },
-  menuIcon: {
-    fontSize: 28,
-    color: '#FFFFFF',
-  },
   logo: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -217,14 +332,10 @@ const styles = StyleSheet.create({
     position: 'relative',
     padding: 5,
   },
-  icon: {
-    fontSize: 24,
-    color: '#FFFFFF',
-  },
   badge: {
     position: 'absolute',
-    top: -2,
-    right: -2,
+    top: 0,
+    right: 0,
     backgroundColor: '#FF9900',
     borderRadius: 10,
     minWidth: 18,
@@ -234,7 +345,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
   },
   searchSection: {
@@ -246,13 +357,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
     alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     height: 45,
   },
   searchIcon: {
-    fontSize: 16,
     marginRight: 10,
-    color: '#666',
   },
   searchInput: {
     flex: 1,
@@ -263,10 +372,6 @@ const styles = StyleSheet.create({
   micButton: {
     padding: 5,
   },
-  micIcon: {
-    fontSize: 16,
-    color: '#666',
-  },
   locationSection: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -274,18 +379,12 @@ const styles = StyleSheet.create({
     paddingTop: 5,
   },
   locationIcon: {
-    fontSize: 14,
     marginRight: 5,
-    color: '#FFFFFF',
   },
   locationText: {
     color: '#FFFFFF',
     fontSize: 14,
     flex: 1,
-  },
-  dropdownIcon: {
-    color: '#FFFFFF',
-    fontSize: 12,
   },
   
   menuOverlay: {
@@ -322,17 +421,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
+  backButton: {
+    padding: 5,
+    marginRight: 10,
+  },
   menuTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
+    flex: 1,
   },
   closeMenuButton: {
     padding: 10,
-  },
-  closeMenuIcon: {
-    fontSize: 20,
-    color: '#333',
   },
   menuContent: {
     flex: 1,
@@ -350,11 +450,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     flex: 1,
-  },
-  menuItemArrow: {
-    fontSize: 18,
-    color: '#999',
-    marginLeft: 10,
   },
   menuLoadingText: {
     fontSize: 16,

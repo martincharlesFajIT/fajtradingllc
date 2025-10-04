@@ -10,9 +10,11 @@ import {
   StatusBar,
   Alert,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useCart } from '../context/CartContext';
+import { createCheckout } from '../shopifyApi';
 
 const CartScreen = () => {
   const navigation = useNavigation();
@@ -27,6 +29,7 @@ const CartScreen = () => {
   } = useCart();
   
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   // Format price with commas
   const formatPrice = (amount) => {
@@ -55,17 +58,68 @@ const CartScreen = () => {
     setShowClearConfirm(false);
   };
 
-  // Proceed to checkout
-  const handleCheckout = () => {
-    if (cartItems.length === 0) {
-      Alert.alert('Cart Empty', 'Please add items to cart before checkout');
-      return;
-    }
-    
-    // Navigate to checkout screen
-    navigation.navigate('Checkout');
-  };
+  // Proceed to checkout - UPDATED FOR WEBVIEW
+  const handleCheckout = async () => {
+  if (cartItems.length === 0) {
+    Alert.alert('Cart Empty', 'Please add items to cart before checkout');
+    return;
+  }
 
+  // Validate that all items have variantId
+  const invalidItems = cartItems.filter(item => !item.variantId);
+  if (invalidItems.length > 0) {
+    console.error('Items missing variantId:', invalidItems);
+    Alert.alert(
+      'Error',
+      'Some items are missing product information. Please remove and re-add them.'
+    );
+    return;
+  }
+
+  setCheckoutLoading(true);
+
+  try {
+    // Prepare line items for Shopify
+    const lineItems = cartItems.map(item => ({
+      variantId: item.variantId,
+      quantity: item.quantity,
+    }));
+
+    console.log('Creating checkout with items:', lineItems.length);
+
+    // Create checkout and get URL
+    const checkout = await createCheckout(lineItems);
+
+    if (checkout && checkout.webUrl) {
+      // IMPORTANT: Stop loading BEFORE navigation
+      setCheckoutLoading(false);
+      
+      console.log('Checkout created successfully');
+      
+      navigation.navigate('Checkout', {
+        checkoutUrl: checkout.webUrl
+      });
+    } else {
+      // Stop loading if checkout failed
+      setCheckoutLoading(false);
+      
+      Alert.alert(
+        'Checkout Error',
+        'Unable to create checkout. Please try again.'
+      );
+    }
+  } catch (error) {
+    console.error('Checkout error:', error);
+    
+    // Stop loading on error
+    setCheckoutLoading(false);
+    
+    Alert.alert(
+      'Error',
+      'Something went wrong. Please try again.'
+    );
+  }
+};
   const renderCartItem = ({ item }) => (
     <View style={styles.cartItem}>
       <Image source={{ uri: item.image }} style={styles.itemImage} />
@@ -190,14 +244,19 @@ const CartScreen = () => {
               </Text>
             </View>
 
-            {/* Checkout Button */}
+            {/* Checkout Button - UPDATED */}
             <TouchableOpacity
-              style={styles.checkoutButton}
+              style={[styles.checkoutButton, checkoutLoading && styles.checkoutButtonDisabled]}
               onPress={handleCheckout}
+              disabled={checkoutLoading}
             >
-              <Text style={styles.checkoutButtonText}>
-                Proceed to Checkout
-              </Text>
+              {checkoutLoading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text style={styles.checkoutButtonText}>
+                  Proceed to Checkout
+                </Text>
+              )}
             </TouchableOpacity>
 
             {/* Continue Shopping */}
@@ -424,6 +483,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
+  },
+  checkoutButtonDisabled: {
+    backgroundColor: '#CCC',
   },
   checkoutButtonText: {
     color: '#FFFFFF',
