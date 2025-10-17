@@ -14,7 +14,6 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { fetchProductsByCollection, fetchCollectionByHandle } from '../shopifyApi';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../components/Header';
 const { width } = Dimensions.get('window');
 
 const CollectionScreen = () => {

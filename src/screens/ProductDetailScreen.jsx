@@ -16,10 +16,11 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { fetchProductById } from '../shopifyApi';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext'; // ✅ Add this import
+import { createCheckout } from '../shopifyApi'; // ✅ Add this import
 
 const { width } = Dimensions.get('window');
 
-// Default VAT percentage (you can change this or make it dynamic)
 const VAT_PERCENTAGE = 5; 
 
 const ProductDetailScreen = () => {
@@ -28,6 +29,7 @@ const ProductDetailScreen = () => {
   const { productId, productName } = route.params;
   const scrollViewRef = useRef(null);
   const { addToCart } = useCart();
+  const { isSignedIn, user, accessToken } = useAuth(); // ✅ Add auth hook
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,15 +39,16 @@ const ProductDetailScreen = () => {
   const [expandedSection, setExpandedSection] = useState(null);
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const [showReturnPolicy, setShowReturnPolicy] = useState(false);
+  const [buyNowLoading, setBuyNowLoading] = useState(false); // ✅ Add loading state
 
-  // Format price with commas
+  // ... keep all your existing functions (formatPrice, calculateVAT, loadProductData, etc.)
+
   const formatPrice = (amount) => {
     const num = parseFloat(amount);
     if (isNaN(num)) return amount;
     return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
   };
 
-  // Calculate VAT amount
   const calculateVAT = (price) => {
     return (parseFloat(price) * VAT_PERCENTAGE) / 100;
   };
@@ -85,23 +88,67 @@ const ProductDetailScreen = () => {
   }, [productId]);
 
   const handleAddToCart = () => {
-    // Add item to cart using context
     addToCart(product, quantity, selectedVariant);
-    
-    // Navigate directly to cart screen
     navigation.navigate('Cart');
   };
 
-  const handleBuyNow = () => {
-    const variant = product.variants[selectedVariant];
-    Alert.alert(
-      'Buy Now',
-      `Proceeding to checkout with ${quantity} x ${product.title}\nTotal: ${formatPrice(parseFloat(variant.price.amount) * quantity)} ${variant.price.currencyCode}`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Proceed', onPress: () => console.log('Proceed to checkout') }
-      ]
-    );
+  // ✅ UPDATED - Direct Buy Now (No Alert)
+  const handleBuyNow = async () => {
+    console.log('🛒 ===== BUY NOW STARTED =====');
+    
+    const currentVariant = product.variants[selectedVariant];
+    
+    // Silent validation
+    if (!currentVariant.availableForSale) {
+      console.log('⚠️ Product not available');
+      return;
+    }
+
+    if (!currentVariant.id) {
+      console.error('⚠️ Missing variant ID');
+      return;
+    }
+
+    setBuyNowLoading(true);
+
+    try {
+      // Prepare line item for this single product
+      const lineItems = [{
+        variantId: currentVariant.id,
+        quantity: quantity,
+      }];
+
+      console.log('📦 Buy Now Item:', lineItems);
+      console.log('👤 User:', isSignedIn ? user?.email : 'Guest');
+
+      // Create checkout directly
+      const checkout = await createCheckout(
+        lineItems,
+        user?.email || null,
+        accessToken || null
+      );
+
+      console.log('📋 Checkout result:', checkout);
+
+      // Navigate if successful
+      if (checkout && checkout.webUrl) {
+        console.log('✅ Navigating to checkout:', checkout.webUrl);
+        
+        navigation.navigate('Checkout', {
+          checkoutUrl: checkout.webUrl
+        });
+      } else {
+        console.error('❌ No checkout URL returned');
+        Alert.alert('Error', 'Could not create checkout. Please try again.');
+      }
+    } catch (error) {
+      console.error('❌ Buy Now error:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setBuyNowLoading(false);
+    }
+    
+    console.log('🛒 ===== BUY NOW ENDED =====');
   };
 
   const handleGetQuote = () => {
@@ -189,6 +236,9 @@ const ProductDetailScreen = () => {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
+        {/* ... All your existing JSX for images, info, variants, etc. ... */}
+        {/* Keep everything the same until the Footer Buttons section */}
+
         {/* Product Images with Swipe */}
         <View style={styles.imageSection}>
           <ScrollView
@@ -209,7 +259,6 @@ const ProductDetailScreen = () => {
             ))}
           </ScrollView>
 
-          {/* Dot Indicators */}
           {product.images.length > 1 && (
             <View style={styles.dotContainer}>
               {product.images.map((_, index) => (
@@ -224,7 +273,6 @@ const ProductDetailScreen = () => {
             </View>
           )}
           
-          {/* Thumbnail Gallery */}
           {product.images.length > 1 && (
             <ScrollView 
               horizontal 
@@ -255,14 +303,12 @@ const ProductDetailScreen = () => {
         <View style={styles.infoSection}>
           <Text style={styles.productTitle}>{product.title}</Text>
           
-          {/* Show Brand if available from metafield, otherwise show vendor */}
           {(product.brand || product.vendor) && (
             <Text style={styles.vendor}>
               by {product.brand || product.vendor}
             </Text>
           )}
 
-          {/* Price Section */}
           {!isPriceZero && (
             <>
               <View style={styles.priceContainer}>
@@ -283,7 +329,6 @@ const ProductDetailScreen = () => {
                 )}
               </View>
 
-              {/* Free Return Badge - Clickable */}
               <TouchableOpacity 
                 style={styles.freeReturnContainer}
                 onPress={() => setShowReturnPolicy(true)}
@@ -293,7 +338,6 @@ const ProductDetailScreen = () => {
                 <Text style={styles.freeReturnIcon}>ℹ️</Text>
               </TouchableOpacity>
 
-              {/* VAT Information */}
               {currentVariant.taxable && (
                 <View style={styles.vatContainer}>
                   <Text style={styles.vatLabel}>Excl. VAT: </Text>
@@ -305,7 +349,6 @@ const ProductDetailScreen = () => {
             </>
           )}
 
-          {/* Availability */}
           {!isPriceZero && (
             <View style={styles.availabilityContainer}>
               {currentVariant.availableForSale ? (
@@ -320,7 +363,6 @@ const ProductDetailScreen = () => {
             </View>
           )}
 
-          {/* Variants Selection */}
           {product.variants.length > 1 && (
             <View style={styles.variantsSection}>
               <Text style={styles.sectionTitle}>Select Variant</Text>
@@ -356,7 +398,6 @@ const ProductDetailScreen = () => {
             </View>
           )}
 
-          {/* Quantity Dropdown - Only show if price is not zero */}
           {!isPriceZero && (
             <View style={styles.quantitySection}>
               <Text style={styles.sectionTitle}>Quantity</Text>
@@ -370,11 +411,10 @@ const ProductDetailScreen = () => {
             </View>
           )}
 
-          {/* Product Details Accordion */}
+          {/* Product Details Accordion - Keep all existing accordion code */}
           <View style={styles.accordionSection}>
             <Text style={styles.mainSectionTitle}>Product Details</Text>
 
-            {/* Brand */}
             {product.brand && (
               <View style={styles.accordionItem}>
                 <TouchableOpacity
@@ -394,7 +434,6 @@ const ProductDetailScreen = () => {
               </View>
             )}
 
-            {/* Short Description */}
             {product.shortDescription && (
               <View style={styles.accordionItem}>
                 <TouchableOpacity
@@ -414,7 +453,6 @@ const ProductDetailScreen = () => {
               </View>
             )}
 
-            {/* Full Description */}
             {product.description && (
               <View style={styles.accordionItem}>
                 <TouchableOpacity
@@ -434,7 +472,6 @@ const ProductDetailScreen = () => {
               </View>
             )}
 
-            {/* Product Type */}
             {product.productType && (
               <View style={styles.accordionItem}>
                 <TouchableOpacity
@@ -454,7 +491,6 @@ const ProductDetailScreen = () => {
               </View>
             )}
 
-            {/* Tags */}
             {product.tags.length > 0 && (
               <View style={styles.accordionItem}>
                 <TouchableOpacity
@@ -483,10 +519,9 @@ const ProductDetailScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Footer Buttons */}
+      {/* ✅ UPDATED Footer Buttons - Buy Now with Loading */}
       <View style={styles.footer}>
         {isPriceZero ? (
-          // Show only "Get a Quote" button when price is 0
           <TouchableOpacity 
             style={styles.quoteButton}
             onPress={handleGetQuote}
@@ -494,7 +529,6 @@ const ProductDetailScreen = () => {
             <Text style={styles.quoteButtonText}>Get a Quote</Text>
           </TouchableOpacity>
         ) : (
-          // Show Add to Cart and Buy Now buttons when price is not 0
           <View style={styles.buttonRow}>
             <TouchableOpacity 
               style={[
@@ -509,21 +543,30 @@ const ProductDetailScreen = () => {
               </Text>
             </TouchableOpacity>
 
+            {/* ✅ UPDATED - Buy Now Button with Loading State */}
             <TouchableOpacity 
               style={[
                 styles.buyNowButton,
-                !currentVariant.availableForSale && styles.buttonDisabled
+                (!currentVariant.availableForSale || buyNowLoading) && styles.buttonDisabled
               ]}
               onPress={handleBuyNow}
-              disabled={!currentVariant.availableForSale}
+              disabled={!currentVariant.availableForSale || buyNowLoading}
+              activeOpacity={0.7}
             >
-              <Text style={styles.buyNowText}>Buy Now</Text>
+              {buyNowLoading ? (
+                <View style={styles.buyNowLoadingContainer}>
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <Text style={styles.buyNowText}> Loading...</Text>
+                </View>
+              ) : (
+                <Text style={styles.buyNowText}>Buy Now</Text>
+              )}
             </TouchableOpacity>
           </View>
         )}
       </View>
 
-      {/* Quantity Modal */}
+      {/* Keep all your existing modals */}
       <Modal
         visible={showQuantityModal}
         transparent={true}
@@ -568,7 +611,6 @@ const ProductDetailScreen = () => {
         </TouchableOpacity>
       </Modal>
 
-      {/* Return Policy Modal */}
       <Modal
         visible={showReturnPolicy}
         transparent={true}
@@ -635,7 +677,18 @@ const ProductDetailScreen = () => {
   );
 };
 
+// ✅ Add this new style for Buy Now loading container
 const styles = StyleSheet.create({
+  // ... keep all your existing styles ...
+  
+  // Add this new style:
+  buyNowLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
+  // ... rest of your existing styles ...
   container: { flex: 1, backgroundColor: '#F5F5F5' },
   headerBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -740,7 +793,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 15,
   },
-  accordionTitle: { fontSize: 16, fontWeight: '600', color: '#232F3E', flex: 1 },
+   accordionTitle: { fontSize: 16, fontWeight: '600', color: '#232F3E', flex: 1 },
   accordionIcon: { fontSize: 24, fontWeight: 'bold', color: '#232F3E', width: 30, textAlign: 'center' },
   accordionContent: {
     paddingBottom: 15,
@@ -778,6 +831,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   buyNowText: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' },
+  buyNowLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   quoteButton: {
     backgroundColor: '#da4925ff',
     paddingVertical: 15,

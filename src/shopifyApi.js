@@ -393,7 +393,7 @@ export async function fetchProductById(productId) {
   }
 }
 
-export async function createCheckout(lineItems, email = null) {
+export async function createCheckout(lineItems, email = null, customerAccessToken = null) {
   const query = `
     mutation cartCreate($input: CartInput!) {
       cartCreate(input: $input) {
@@ -423,6 +423,7 @@ export async function createCheckout(lineItems, email = null) {
   try {
     console.log('=== CREATING CART ===');
     console.log('Line Items:', JSON.stringify(lineItems, null, 2));
+    console.log('Customer Access Token:', customerAccessToken ? 'Provided' : 'Not provided');
     
     // Transform line items to cart lines format
     const cartLines = lineItems.map(item => ({
@@ -434,11 +435,20 @@ export async function createCheckout(lineItems, email = null) {
       lines: cartLines,
     };
 
-    // Add buyer identity if email is provided
-    if (email) {
+    // Add buyer identity with customer access token if user is logged in
+    if (customerAccessToken) {
+      input.buyerIdentity = {
+        customerAccessToken: customerAccessToken
+      };
+      console.log('✅ Cart will be associated with logged-in customer');
+    } else if (email) {
+      // If no access token but email provided, use email only
       input.buyerIdentity = {
         email: email
       };
+      console.log('✅ Cart will use guest email:', email);
+    } else {
+      console.log('ℹ️ Creating guest cart (no customer association)');
     }
 
     console.log('Cart Input:', JSON.stringify(input, null, 2));
@@ -485,15 +495,14 @@ export async function createCheckout(lineItems, email = null) {
       return null;
     }
 
-    console.log('✅ Cart Created Successfully!');
+    console.log('Cart Created Successfully!');
     console.log('Cart ID:', cart.id);
     console.log('Checkout URL:', cart.checkoutUrl);
     console.log('=== END ===');
 
-
     return {
       id: cart.id,
-      webUrl: cart.checkoutUrl, // Map checkoutUrl to webUrl for compatibility
+      webUrl: cart.checkoutUrl,
       totalQuantity: cart.totalQuantity,
       totalAmount: cart.cost?.totalAmount
     };
@@ -503,5 +512,449 @@ export async function createCheckout(lineItems, email = null) {
     console.error("Error:", error.message);
     console.error("=== END ERROR ===");
     return null;
+  }
+}
+
+// Customer Sign Up (Create Account)
+export async function createCustomer(email, password, firstName, lastName) {
+  const query = `
+    mutation customerCreate($input: CustomerCreateInput!) {
+      customerCreate(input: $input) {
+        customer {
+          id
+          email
+          firstName
+          lastName
+        }
+        customerUserErrors {
+          code
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch(SHOPIFY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_TOKEN,
+      },
+      body: JSON.stringify({
+        query,
+        variables: {
+          input: {
+            email,
+            password,
+            firstName,
+            lastName,
+            acceptsMarketing: false,
+          }
+        }
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      return { success: false, errors: result.errors };
+    }
+
+    if (result.data?.customerCreate?.customerUserErrors?.length > 0) {
+      console.error("Customer creation errors:", result.data.customerCreate.customerUserErrors);
+      return { 
+        success: false, 
+        errors: result.data.customerCreate.customerUserErrors 
+      };
+    }
+
+    const customer = result.data?.customerCreate?.customer;
+    
+    if (!customer) {
+      return { success: false, errors: [{ message: "Failed to create account" }] };
+    }
+
+    return {
+      success: true,
+      customer: {
+        id: customer.id,
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+      }
+    };
+
+  } catch (error) {
+    console.error("Error creating customer:", error);
+    return { success: false, errors: [{ message: error.message }] };
+  }
+}
+
+// Customer Sign In (Access Token)
+export async function customerSignIn(email, password) {
+  const query = `
+    mutation customerAccessTokenCreate($input: CustomerAccessTokenCreateInput!) {
+      customerAccessTokenCreate(input: $input) {
+        customerAccessToken {
+          accessToken
+          expiresAt
+        }
+        customerUserErrors {
+          code
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch(SHOPIFY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_TOKEN,
+      },
+      body: JSON.stringify({
+        query,
+        variables: {
+          input: {
+            email,
+            password,
+          }
+        }
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      return { success: false, errors: result.errors };
+    }
+
+    if (result.data?.customerAccessTokenCreate?.customerUserErrors?.length > 0) {
+      const errors = result.data.customerAccessTokenCreate.customerUserErrors;
+      console.error("Sign in errors:", errors);
+      return { success: false, errors };
+    }
+
+    const tokenData = result.data?.customerAccessTokenCreate?.customerAccessToken;
+    
+    if (!tokenData) {
+      return { success: false, errors: [{ message: "Failed to sign in" }] };
+    }
+
+    // Now fetch customer details with the access token
+    const customerData = await getCustomerData(tokenData.accessToken);
+
+    return {
+      success: true,
+      accessToken: tokenData.accessToken,
+      expiresAt: tokenData.expiresAt,
+      customer: customerData,
+    };
+
+  } catch (error) {
+    console.error("Error signing in:", error);
+    return { success: false, errors: [{ message: error.message }] };
+  }
+}
+
+// Get Customer Data
+export async function getCustomerData(accessToken) {
+  const query = `
+    query getCustomer($customerAccessToken: String!) {
+      customer(customerAccessToken: $customerAccessToken) {
+        id
+        email
+        firstName
+        lastName
+        phone
+        defaultAddress {
+          id
+          address1
+          address2
+          city
+          province
+          country
+          zip
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch(SHOPIFY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_TOKEN,
+      },
+      body: JSON.stringify({
+        query,
+        variables: { customerAccessToken: accessToken }
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      return null;
+    }
+
+    return result.data?.customer || null;
+
+  } catch (error) {
+    console.error("Error fetching customer data:", error);
+    return null;
+  }
+}
+
+// Customer Sign Out (Delete Access Token)
+export async function customerSignOut(accessToken) {
+  const query = `
+    mutation customerAccessTokenDelete($customerAccessToken: String!) {
+      customerAccessTokenDelete(customerAccessToken: $customerAccessToken) {
+        deletedAccessToken
+        deletedCustomerAccessTokenId
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch(SHOPIFY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_TOKEN,
+      },
+      body: JSON.stringify({
+        query,
+        variables: { customerAccessToken: accessToken }
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      return { success: false };
+    }
+    
+    return { success: true };
+
+  } catch (error) {
+    console.error("Error signing out:", error);
+    return { success: false };
+  }
+}
+
+
+// Customer Password Reset/Change
+export async function customerUpdate(accessToken, firstName, lastName) {
+  const query = `
+    mutation customerUpdate($customerAccessToken: String!, $customer: CustomerUpdateInput!) {
+      customerUpdate(customerAccessToken: $customerAccessToken, customer: $customer) {
+        customer {
+          id
+          email
+          firstName
+          lastName
+        }
+        customerUserErrors {
+          code
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  try {
+    console.log('=== CUSTOMER UPDATE ===');
+    console.log('Access Token Type:', typeof accessToken);
+    console.log('Access Token exists:', !!accessToken);
+    console.log('Access Token Length:', accessToken?.length);
+    console.log('First Name:', firstName);
+    console.log('Last Name:', lastName);
+
+    if (!accessToken || typeof accessToken !== 'string' || accessToken.trim() === '') {
+      console.error('❌ Invalid access token');
+      return { 
+        success: false, 
+        errors: [{ message: 'Invalid access token. Please sign in again.' }] 
+      };
+    }
+
+    if (!firstName || !lastName) {
+      console.error('❌ Missing name fields');
+      return { 
+        success: false, 
+        errors: [{ message: 'First name and last name are required' }] 
+      };
+    }
+
+    const variables = {
+      customerAccessToken: accessToken,
+      customer: {
+        firstName: firstName,
+        lastName: lastName
+      }
+    };
+
+    console.log('Variables being sent:', JSON.stringify(variables, null, 2));
+
+    const response = await fetch(SHOPIFY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_TOKEN,
+      },
+      body: JSON.stringify({
+        query,
+        variables
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('❌ HTTP Error:', response.status);
+      return { 
+        success: false, 
+        errors: [{ message: `HTTP Error: ${response.status}` }] 
+      };
+    }
+
+    const result = await response.json();
+    console.log('=== API RESPONSE ===');
+    console.log(JSON.stringify(result, null, 2));
+    console.log('===================');
+
+    if (result.errors) {
+      console.error("❌ GraphQL errors:", result.errors);
+      return { success: false, errors: result.errors };
+    }
+
+    if (result.data?.customerUpdate?.customerUserErrors?.length > 0) {
+      const errors = result.data.customerUpdate.customerUserErrors;
+      console.error("❌ Customer update errors:", errors);
+      return { success: false, errors };
+    }
+
+    const customer = result.data?.customerUpdate?.customer;
+    
+    if (!customer) {
+      console.error('❌ No customer data returned');
+      return { 
+        success: false, 
+        errors: [{ message: "Failed to update profile" }] 
+      };
+    }
+
+    console.log('✅ Customer updated successfully');
+    console.log('Updated customer:', customer);
+    console.log('=== END ===');
+
+    return {
+      success: true,
+      customer: {
+        id: customer.id,
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName
+      }
+    };
+
+  } catch (error) {
+    console.error("❌ Exception in customerUpdate:", error);
+    return { 
+      success: false, 
+      errors: [{ message: error.message || 'Unknown error occurred' }] 
+    };
+  }
+}
+
+// Autocomplete/Predictive Search
+export async function predictiveSearch(query) {
+  const searchQuery = `
+    query predictiveSearch($query: String!) {
+      predictiveSearch(query: $query, limit: 10, types: [PRODUCT]) {
+        products {
+          id
+          title
+          handle
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+          variants(first: 1) {
+            edges {
+              node {
+                id
+                price {
+                  amount
+                  currencyCode
+                }
+                availableForSale
+              }
+            }
+          }
+          vendor
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch(SHOPIFY_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_TOKEN,
+      },
+      body: JSON.stringify({
+        query: searchQuery,
+        variables: { query }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.errors) {
+      console.error("GraphQL errors:", result.errors);
+      return [];
+    }
+
+    const products = result.data?.predictiveSearch?.products || [];
+
+    return products.map((product) => ({
+      id: product.id,
+      name: product.title,
+      handle: product.handle,
+      price: `${product.variants.edges[0]?.node.price.amount} ${product.variants.edges[0]?.node.price.currencyCode}`,
+      image: product.images.edges[0]?.node.url || "https://via.placeholder.com/50",
+      availableForSale: product.variants.edges[0]?.node.availableForSale || false,
+      vendor: product.vendor,
+    }));
+
+  } catch (error) {
+    console.error("Error in predictive search:", error);
+    return [];
   }
 }

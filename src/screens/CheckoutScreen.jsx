@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -11,23 +11,64 @@ import {
 import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import AuthModal from '../components/AuthModal';
 
 const CheckoutScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { checkoutUrl } = route.params;
-  const { clearCart } = useCart();
+  const { clearCart, cartItems } = useCart();
+  const { isSignedIn, user, signIn, signUp } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
 
   const handleNavigationChange = (navState) => {
     const { url } = navState;
     
+    console.log('📍 Checkout URL changed:', url);
+    
+    // Check if user is trying to sign in
+    if (url.includes('/account/login') || url.includes('/account/register')) {
+      console.log('🔐 User trying to sign in at checkout');
+      
+      // Show our custom auth modal instead
+      setIsAuthModalVisible(true);
+      
+      // Go back to prevent Shopify login page
+      navigation.goBack();
+      return;
+    }
+    
     // Check if checkout is complete
     if (url.includes('/thank_you') || url.includes('/orders/')) {
-      // Clear cart and go to success
+      console.log('✅ Order completed successfully!');
+      
+      if (isSignedIn && user) {
+        console.log(`🎉 Order created for customer: ${user.email}`);
+      }
+      
       clearCart();
       navigation.replace('OrderSuccess');
     }
+  };
+
+  const handleSignInSuccess = () => {
+    console.log('✅ User signed in successfully');
+    setIsAuthModalVisible(false);
+    
+    Alert.alert(
+      'Sign In Successful',
+      'Please proceed to checkout again. Your order will now be linked to your account.',
+      [
+        {
+          text: 'Go to Cart',
+          onPress: () => {
+            navigation.goBack(); // Go back to cart to recreate checkout
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -53,15 +94,32 @@ const CheckoutScreen = () => {
         >
           <Text style={styles.backButtonText}>✕</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Secure Checkout</Text>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Secure Checkout</Text>
+          {isSignedIn && user && (
+            <Text style={styles.headerSubtitle}>
+              {user.firstName || user.email}
+            </Text>
+          )}
+          {!isSignedIn && (
+            <TouchableOpacity
+              style={styles.signInPrompt}
+              onPress={() => setIsAuthModalVisible(true)}
+            >
+              <Text style={styles.signInPromptText}>
+                Sign in for faster checkout
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <View style={styles.headerRight} />
       </View>
 
       {/* Loading Indicator */}
       {loading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#da4925ff" />
-          <Text style={styles.loadingText}>Loading checkout...</Text>
+          <ActivityIndicator size="large" color="#FF9900" />
+          <Text style={styles.loadingText}>Loading secure checkout...</Text>
         </View>
       )}
 
@@ -75,6 +133,28 @@ const CheckoutScreen = () => {
         startInLoadingState={true}
         javaScriptEnabled={true}
         domStorageEnabled={true}
+        thirdPartyCookiesEnabled={true}
+        sharedCookiesEnabled={true}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        visible={isAuthModalVisible}
+        onClose={() => setIsAuthModalVisible(false)}
+        onSignIn={async (email, password) => {
+          const result = await signIn(email, password);
+          if (result.success) {
+            handleSignInSuccess();
+          }
+          return result;
+        }}
+        onSignUp={async (email, password, firstName, lastName) => {
+          const result = await signUp(email, password, firstName, lastName);
+          if (result.success) {
+            handleSignInSuccess();
+          }
+          return result;
+        }}
       />
     </SafeAreaView>
   );
@@ -106,12 +186,31 @@ const styles = StyleSheet.create({
     color: '#232F3E',
     fontWeight: 'bold',
   },
+  headerTitleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
   headerTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#232F3E',
-    flex: 1,
-    textAlign: 'center',
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  signInPrompt: {
+    marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: '#E8F5E9',
+    borderRadius: 4,
+  },
+  signInPromptText: {
+    fontSize: 11,
+    color: '#4CAF50',
+    fontWeight: '600',
   },
   headerRight: {
     width: 40,

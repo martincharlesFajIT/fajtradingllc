@@ -8,12 +8,14 @@ import {
   FlatList,
   SafeAreaView,
   StatusBar,
-  Alert,
   Modal,
   ActivityIndicator,
+  Alert,
+  Pressable,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext'; // Add this import
 import { createCheckout } from '../shopifyApi';
 
 const CartScreen = () => {
@@ -28,8 +30,13 @@ const CartScreen = () => {
     getTotal,
   } = useCart();
   
+  // Add auth hook
+  const { isSignedIn, user, accessToken } = useAuth();
+  
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [itemToRemove, setItemToRemove] = useState(null);
+  const [errorModal, setErrorModal] = useState({ visible: false, title: '', message: '' });
 
   // Format price with commas
   const formatPrice = (amount) => {
@@ -38,88 +45,128 @@ const CartScreen = () => {
 
   // Remove item with confirmation
   const handleRemoveItem = (itemId) => {
-    Alert.alert(
-      'Remove Item',
-      'Are you sure you want to remove this item from cart?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => removeFromCart(itemId)
-        }
-      ]
-    );
+    console.log('🗑️ Remove button clicked for item:', itemId);
+    setItemToRemove(itemId);
+  };
+
+  // Confirm item removal
+  const confirmRemoveItem = () => {
+    console.log('🔴 ===== confirmRemoveItem START =====');
+    console.log('🔴 itemToRemove:', itemToRemove);
+    
+    if (!itemToRemove) {
+      console.log('⚠️ No item to remove!');
+      return;
+    }
+    
+    console.log('✅ Removing item:', itemToRemove);
+    
+    try {
+      removeFromCart(itemToRemove);
+      console.log('✓ removeFromCart executed');
+    } catch (error) {
+      console.error('❌ Error in removeFromCart:', error);
+    }
+    
+    setItemToRemove(null);
+    console.log('🔴 ===== confirmRemoveItem END =====');
+  };
+
+  // Cancel item removal
+  const cancelRemoveItem = () => {
+    console.log('❌ User cancelled removal');
+    setItemToRemove(null);
   };
 
   // Clear cart with confirmation
   const handleClearCart = () => {
+    console.log('Clearing entire cart');
     clearCart();
     setShowClearConfirm(false);
   };
 
-  // Proceed to checkout - UPDATED FOR WEBVIEW
+  // Proceed to checkout - UPDATED WITH AUTH
   const handleCheckout = async () => {
-  if (cartItems.length === 0) {
-    Alert.alert('Cart Empty', 'Please add items to cart before checkout');
-    return;
-  }
-
-  // Validate that all items have variantId
-  const invalidItems = cartItems.filter(item => !item.variantId);
-  if (invalidItems.length > 0) {
-    console.error('Items missing variantId:', invalidItems);
-    Alert.alert(
-      'Error',
-      'Some items are missing product information. Please remove and re-add them.'
-    );
-    return;
-  }
-
-  setCheckoutLoading(true);
-
-  try {
-    // Prepare line items for Shopify
-    const lineItems = cartItems.map(item => ({
-      variantId: item.variantId,
-      quantity: item.quantity,
-    }));
-
-    console.log('Creating checkout with items:', lineItems.length);
-
-    // Create checkout and get URL
-    const checkout = await createCheckout(lineItems);
-
-    if (checkout && checkout.webUrl) {
-      // IMPORTANT: Stop loading BEFORE navigation
-      setCheckoutLoading(false);
-      
-      console.log('Checkout created successfully');
-      
-      navigation.navigate('Checkout', {
-        checkoutUrl: checkout.webUrl
+    if (cartItems.length === 0) {
+      setErrorModal({
+        visible: true,
+        title: 'Cart Empty',
+        message: 'Please add items to cart before checkout'
       });
-    } else {
-      // Stop loading if checkout failed
+      return;
+    }
+
+    // Validate that all items have variantId
+    const invalidItems = cartItems.filter(item => !item.variantId);
+    if (invalidItems.length > 0) {
+      console.error('Items missing variantId:', invalidItems);
+      setErrorModal({
+        visible: true,
+        title: 'Error',
+        message: 'Some items are missing product information. Please remove and re-add them.'
+      });
+      return;
+    }
+
+    setCheckoutLoading(true);
+
+    try {
+      // Prepare line items for Shopify
+      const lineItems = cartItems.map(item => ({
+        variantId: item.variantId,
+        quantity: item.quantity,
+      }));
+
+      console.log('🛒 Creating checkout...');
+      console.log('📦 Items count:', lineItems.length);
+      console.log('👤 User signed in:', isSignedIn);
+      console.log('📧 User email:', user?.email);
+      console.log('🔑 Has access token:', !!accessToken);
+
+      // Create checkout with customer access token if user is logged in
+      const checkout = await createCheckout(
+        lineItems,
+        user?.email || null,      // Pass user email if available
+        accessToken || null        // Pass access token if user is logged in
+      );
+
+      if (checkout && checkout.webUrl) {
+        setCheckoutLoading(false);
+        
+        console.log('Checkout created successfully');
+        console.log('🔗 Checkout URL:', checkout.webUrl);
+        
+        if (isSignedIn && user) {
+          console.log(`Checkout created for customer: ${user.email}`);
+        } else {
+          console.log('👤 Guest checkout created');
+        }
+        
+        // Navigate to checkout screen
+        navigation.navigate('Checkout', {
+          checkoutUrl: checkout.webUrl
+        });
+      } else {
+        setCheckoutLoading(false);
+        
+        setErrorModal({
+          visible: true,
+          title: 'Checkout Error',
+          message: 'Unable to create checkout. Please try again.'
+        });
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
       setCheckoutLoading(false);
       
-      Alert.alert(
-        'Checkout Error',
-        'Unable to create checkout. Please try again.'
-      );
+      setErrorModal({
+        visible: true,
+        title: 'Error',
+        message: 'Something went wrong. Please try again.'
+      });
     }
-  } catch (error) {
-    console.error('Checkout error:', error);
-    
-    // Stop loading on error
-    setCheckoutLoading(false);
-    
-    Alert.alert(
-      'Error',
-      'Something went wrong. Please try again.'
-    );
-  }
-};
+  };
+
   const renderCartItem = ({ item }) => (
     <View style={styles.cartItem}>
       <Image source={{ uri: item.image }} style={styles.itemImage} />
@@ -137,14 +184,20 @@ const CartScreen = () => {
         <View style={styles.quantityContainer}>
           <TouchableOpacity
             style={styles.quantityButton}
-            onPress={() => updateQuantity(item.id, item.quantity - 1)}
+            onPress={() => {
+              console.log('Decreasing quantity for:', item.id);
+              updateQuantity(item.id, item.quantity - 1);
+            }}
           >
             <Text style={styles.quantityButtonText}>−</Text>
           </TouchableOpacity>
           <Text style={styles.quantityText}>{item.quantity}</Text>
           <TouchableOpacity
             style={styles.quantityButton}
-            onPress={() => updateQuantity(item.id, item.quantity + 1)}
+            onPress={() => {
+              console.log('Increasing quantity for:', item.id);
+              updateQuantity(item.id, item.quantity + 1);
+            }}
           >
             <Text style={styles.quantityButtonText}>+</Text>
           </TouchableOpacity>
@@ -175,7 +228,7 @@ const CartScreen = () => {
       </Text>
       <TouchableOpacity
         style={styles.shopButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => navigation.navigate('Home')}
       >
         <Text style={styles.shopButtonText}>Continue Shopping</Text>
       </TouchableOpacity>
@@ -184,27 +237,36 @@ const CartScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Shopping Cart ({cartItems.length})</Text>
+      <StatusBar barStyle="light-content" backgroundColor="#232F3E" />
+
+      <View style={styles.cartHeader}>
+        <Text style={styles.cartHeaderTitle}>Shopping Cart ({cartItems.length})</Text>
         {cartItems.length > 0 && (
           <TouchableOpacity
             style={styles.clearButton}
             onPress={() => setShowClearConfirm(true)}
           >
-            <Text style={styles.clearButtonText}>Clear</Text>
+            <Text style={styles.clearButtonText}>Clear All</Text>
           </TouchableOpacity>
         )}
-        {cartItems.length === 0 && <View style={styles.headerRight} />}
       </View>
+
+      {/* User Info Banner - NEW */}
+      {isSignedIn && user && cartItems.length > 0 && (
+        <View style={styles.userInfoBanner}>
+          <View style={styles.userInfoContent}>
+            <Text style={styles.userInfoIcon}>✓</Text>
+            <View style={styles.userInfoTextContainer}>
+              <Text style={styles.userInfoText}>
+                Signed in as {user.firstName || user.email}
+              </Text>
+              <Text style={styles.userInfoSubtext}>
+                Order will be linked to your account
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
 
       {cartItems.length === 0 ? (
         renderEmptyCart()
@@ -244,14 +306,17 @@ const CartScreen = () => {
               </Text>
             </View>
 
-            {/* Checkout Button - UPDATED */}
+            {/* Checkout Button */}
             <TouchableOpacity
               style={[styles.checkoutButton, checkoutLoading && styles.checkoutButtonDisabled]}
               onPress={handleCheckout}
               disabled={checkoutLoading}
             >
               {checkoutLoading ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
+                <View style={styles.checkoutLoadingContainer}>
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <Text style={styles.checkoutLoadingText}>Creating checkout...</Text>
+                </View>
               ) : (
                 <Text style={styles.checkoutButtonText}>
                   Proceed to Checkout
@@ -262,7 +327,7 @@ const CartScreen = () => {
             {/* Continue Shopping */}
             <TouchableOpacity
               style={styles.continueButton}
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.navigate('Home')}
             >
               <Text style={styles.continueButtonText}>Continue Shopping</Text>
             </TouchableOpacity>
@@ -282,7 +347,7 @@ const CartScreen = () => {
           activeOpacity={1}
           onPress={() => setShowClearConfirm(false)}
         >
-          <View style={styles.modalContent}>
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
             <Text style={styles.modalTitle}>Clear Cart?</Text>
             <Text style={styles.modalMessage}>
               Are you sure you want to remove all items from your cart?
@@ -304,6 +369,75 @@ const CartScreen = () => {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {/* Remove Item Confirmation - Overlay Dialog */}
+      {itemToRemove !== null && (
+        <View style={styles.modalBackdrop} pointerEvents="box-none">
+          <Pressable 
+            style={StyleSheet.absoluteFill}
+            onPress={() => {
+              console.log('🌫️ Backdrop pressed - closing');
+              setItemToRemove(null);
+            }}
+          />
+          <View style={styles.modalBox} pointerEvents="box-none">
+            <Text style={styles.modalTitle}>Remove Item?</Text>
+            <Text style={styles.modalMessage}>
+              Are you sure you want to remove this item from your cart?
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => {
+                  console.log('❌ CANCEL PRESSED');
+                  setItemToRemove(null);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={() => {
+                  console.log('✅ REMOVE PRESSED');
+                  const idToRemove = itemToRemove;
+                  setItemToRemove(null);
+                  removeFromCart(idToRemove);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.modalConfirmText}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Error Modal */}
+      <Modal
+        visible={errorModal.visible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setErrorModal({ visible: false, title: '', message: '' })}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setErrorModal({ visible: false, title: '', message: '' })}
+        >
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
+            <Text style={styles.modalTitle}>{errorModal.title}</Text>
+            <Text style={styles.modalMessage}>{errorModal.message}</Text>
+            <TouchableOpacity
+              style={[styles.modalConfirmButton, { width: '100%' }]}
+              onPress={() => setErrorModal({ visible: false, title: '', message: '' })}
+            >
+              <Text style={styles.modalConfirmText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -313,44 +447,61 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
-  header: {
+  cartHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5E5',
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    fontSize: 24,
-    color: '#232F3E',
-    fontWeight: 'bold',
-  },
-  headerTitle: {
-    fontSize: 18,
+  cartHeaderTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#232F3E',
-    flex: 1,
-    textAlign: 'center',
-  },
-  headerRight: {
-    width: 40,
   },
   clearButton: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#FFEBEE',
+    borderRadius: 6,
   },
   clearButtonText: {
     fontSize: 14,
     color: '#da4925ff',
     fontWeight: '600',
+  },
+  // User Info Banner Styles - NEW
+  userInfoBanner: {
+    backgroundColor: '#E8F5E9',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#C8E6C9',
+  },
+  userInfoContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userInfoIcon: {
+    fontSize: 20,
+    color: '#4CAF50',
+    marginRight: 10,
+  },
+  userInfoTextContainer: {
+    flex: 1,
+  },
+  userInfoText: {
+    color: '#2E7D32',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  userInfoSubtext: {
+    color: '#558B2F',
+    fontSize: 12,
+    marginTop: 2,
   },
   listContainer: {
     padding: 15,
@@ -492,6 +643,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  checkoutLoadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  checkoutLoadingText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   continueButton: {
     backgroundColor: '#FFFFFF',
     paddingVertical: 15,
@@ -595,6 +756,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#FFFFFF',
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 99999,
+    elevation: 99999,
+  },
+  modalBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    padding: 25,
+    width: '85%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+    zIndex: 100000,
   },
 });
 

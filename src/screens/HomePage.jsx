@@ -21,11 +21,9 @@ const HomePage = () => {
   const bannerRef = useRef(null);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
-  // Single state for all collections
   const [collections, setCollections] = useState({});
   const [loading, setLoading] = useState({});
 
-  // Define your collection groups
   const COLLECTION_GROUPS = {
     featured: {
       title: "Coffee Machines",
@@ -55,6 +53,52 @@ const HomePage = () => {
       ]
     }
   };
+
+  // Categories with their Shopify collection handles
+  const categories = [
+    { 
+      id: 1,
+      name: 'Coffee Machine',
+      handle: 'professional-coffee-machines',
+      image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_82110317-e2b4-47b5-8395-54aade9aaf0f_200x200.jpg?v=1746439090' 
+    },
+    { 
+      id: 2, 
+      name: 'Vacuum Cleaner',
+      handle: 'robot-vacuum-cleaners',
+      image: 'https://www.fajtradingllc.com/cdn/shop/collections/robotic-vacuum-cleaner_a0aa2b94-945e-4fa8-8990-8a02e39273e7_375x.jpg?v=1746444970' 
+    },
+    { 
+      id: 3, 
+      name: 'Washing Machine',
+      handle: 'washing-machines',
+      image: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=300&h=400&fit=crop&crop=center' 
+    },
+    { 
+      id: 4,
+      name: 'Cookers', 
+      handle: 'cookers',
+      image: 'https://www.fajtradingllc.com/cdn/shop/collections/Dr_Coffee_F11_Pro_Fully_Automatic_Coffee_Machine_535x.png?v=1746437119' 
+    },
+    { 
+      id: 5, 
+      name: 'Air Conditioner', 
+      handle: 'air-conditioners',
+      image: 'https://www.fajtradingllc.com/cdn/shop/collections/ac_39ccf573-4268-48b7-bfb6-c90f3ea4fc32_535x.jpg?v=1746443774' 
+    },
+    { 
+      id: 6, 
+      name: 'Dishwasher', 
+      handle: 'dishwashers',
+      image: 'https://cdn.shopify.com/s/files/1/0706/8139/5436/collections/dishwasher.jpg?v=1746440666' 
+    },
+    { 
+      id: 7, 
+      name: 'Refrigerators', 
+      handle: 'refrigerator',
+      image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_375x.jpg?v=1746432020' 
+    },
+  ];
 
   const loadCollections = async (groupKey, handles) => {
     try {
@@ -86,7 +130,7 @@ const HomePage = () => {
     const loadCoffeeMachines = async () => {
       try {
         const products = await fetchProductsByCollection("professional-coffee-machines");
-        setCoffeeMachines(products.products || products); // Handle both old and new API response
+        setCoffeeMachines(products.products || products);
       } catch (error) {
         console.error("Error fetching coffee machine products:", error);
       } finally {
@@ -116,7 +160,6 @@ const HomePage = () => {
       setCurrentBannerIndex((prevIndex) => {
         const nextIndex = (prevIndex + 1) % bannerData.length;
         
-        // Scroll to next banner
         if (bannerRef.current) {
           bannerRef.current.scrollToIndex({
             index: nextIndex,
@@ -131,27 +174,16 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, [bannerData.length]);
 
-  // Handle manual scroll
   const handleBannerScroll = (event) => {
     const contentOffset = event.nativeEvent.contentOffset.x;
     const index = Math.round(contentOffset / (width - 20));
     setCurrentBannerIndex(index);
   };
 
-  const categories = [
-    { id: 1, name: 'Coffee Machine', image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_82110317-e2b4-47b5-8395-54aade9aaf0f_200x200.jpg?v=1746439090' },
-    { id: 2, name: 'Vacuum Cleaner', image: 'https://www.fajtradingllc.com/cdn/shop/collections/robotic-vacuum-cleaner_a0aa2b94-945e-4fa8-8990-8a02e39273e7_375x.jpg?v=1746444970' },
-    { id: 3, name: 'Washing Machine', image: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=300&h=400&fit=crop&crop=center' },
-    { id: 4, name: 'Cookers', image: 'https://www.fajtradingllc.com/cdn/shop/collections/Dr_Coffee_F11_Pro_Fully_Automatic_Coffee_Machine_535x.png?v=1746437119' },
-    { id: 5, name: 'Air Conditioner', image: 'https://www.fajtradingllc.com/cdn/shop/collections/ac_39ccf573-4268-48b7-bfb6-c90f3ea4fc32_535x.jpg?v=1746443774' },
-    { id: 6, name: 'Dishwasher', image: 'https://www.fajtradingllc.com/cdn/shop/files/3_e7c0d71f-e53f-4a2c-8caa-0d63ee546891_535x.jpg?v=1737182158' },
-    { id: 7, name: 'Refrigerators', image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_375x.jpg?v=1746432020' },
-  ];
-
   const deals = [
-    { id: 1, name: 'Gaming Laptop', salePrice: '$899.99', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc4aSsFA96t5sfaxwxD8bbbDzYnusOissMZA&s', discount: '31%' },
-    { id: 2, name: 'Coffee Maker', salePrice: '$89.99', image: 'https://down-sg.img.susercontent.com/file/cn-11134207-7ras8-m6evdp35a2fn73', discount: '40%' },
-    { id: 3, name: 'Coffee Maker', salePrice: '$89.99', image: 'https://cumuluscoffee.com/cdn/shop/files/image6344284.jpg?v=1750178201&width=2475', discount: '40%' },
+    { id: 1, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc4aSsFA96t5sfaxwxD8bbbDzYnusOissMZA&s' },
+    { id: 2, image: 'https://down-sg.img.susercontent.com/file/cn-11134207-7ras8-m6evdp35a2fn73'},
+    { id: 3, image: 'https://cumuluscoffee.com/cdn/shop/files/image6344284.jpg?v=1750178201&width=2475'},
   ];
 
   const shopsave = [
@@ -178,7 +210,6 @@ const HomePage = () => {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>{title}</Text>
           <TouchableOpacity>
-            <Text style={styles.seeAllText}>See all</Text>
           </TouchableOpacity>
         </View>
 
@@ -214,7 +245,6 @@ const HomePage = () => {
               </TouchableOpacity>
             ))}
 
-            {/* Fill empty spots if less than 4 collections */}
             {groupCollections.length < 4 && Array.from({ length: 4 - groupCollections.length }).map((_, index) => (
               <View key={`empty-${groupKey}-${index}`} style={[styles.gridItem, styles.emptyGridItem]}>
                 <Text style={styles.emptyGridText}>Coming Soon</Text>
@@ -226,19 +256,24 @@ const HomePage = () => {
     );
   };
 
-  // Your existing render functions
   const renderBanner = ({ item }) => (
     <TouchableOpacity style={styles.bannerItem}>
       <Image source={{ uri: item.image }} style={styles.bannerImage} />
     </TouchableOpacity>
   );
 
+  // Updated renderCategory to make it clickable
   const renderCategory = ({ item }) => (
     <TouchableOpacity 
       style={styles.categoryItem}
       onPress={() => {
-        console.log("Navigate to category:", item.name);
+        console.log("🔗 Navigate to category:", item.name, "handle:", item.handle);
+        navigation.navigate('CollectionProducts', { 
+          handle: item.handle, 
+          title: item.name 
+        });
       }}
+      activeOpacity={0.8}
     >
       <Image source={{ uri: item.image }} style={styles.categoryImage} />
       <View style={styles.categoryOverlay}>
@@ -272,13 +307,9 @@ const HomePage = () => {
       style={styles.dealItem}
       onPress={() => {
         console.log("Navigate to deal:", item.name);
-      }}
-    >
+      }}>
       <Image source={{ uri: item.image }} style={styles.dealImage} />
       <View style={styles.dealInfo}>
-        <View style={styles.discountBadge}>
-          <Text style={styles.discountText}>{item.discount} OFF</Text>
-        </View>
         <Text style={styles.dealName} numberOfLines={1}>{item.name}</Text>
         <View style={styles.priceContainer}>
           <Text style={styles.salePrice}>{item.salePrice}</Text>
@@ -320,7 +351,6 @@ const HomePage = () => {
             decelerationRate="fast"
             onMomentumScrollEnd={handleBannerScroll}
             onScrollToIndexFailed={(info) => {
-              // Handle scroll failure gracefully
               console.log('Banner scroll failed:', info);
             }}
           />
@@ -343,7 +373,7 @@ const HomePage = () => {
           </View>
         </View>
 
-        {/* Categories */}
+        {/* Categories - Now Clickable! */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Shop by Category</Text>
           <FlatList
@@ -360,9 +390,6 @@ const HomePage = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Sponsor Products</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
-            </TouchableOpacity>
           </View>
           <FlatList
             data={deals}
@@ -378,9 +405,6 @@ const HomePage = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Featured by Partners</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
-            </TouchableOpacity>
           </View>
           <FlatList
             data={featuredpartners}
@@ -399,9 +423,6 @@ const HomePage = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Get Discount on Coffee machine</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
-            </TouchableOpacity>
           </View>
           <FlatList
             data={deals}
@@ -436,6 +457,7 @@ const HomePage = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -460,13 +482,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 10,
   },
-  seeAllText: {
-    color: '#007185',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-
-  // Banner Styles
   bannerItem: {
     width: width - 20,
     marginHorizontal: 10,
@@ -496,15 +511,13 @@ const styles = StyleSheet.create({
     width: 20,
     borderRadius: 4,
   },
-
-  // Category Styles
   categoriesContainer: {
     paddingHorizontal: 10,
   },
   categoryItem: {
     marginHorizontal: 8,
-    width: 180,
-    height: 250,
+    width: 280,
+    height: 280,
     borderRadius: 12,
     overflow: 'hidden',
     elevation: 3,
@@ -536,8 +549,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 16,
   },
-
-  // Deal Styles
   dealsContainer: {
     paddingHorizontal: 10,
   },
@@ -596,8 +607,6 @@ const styles = StyleSheet.create({
     color: '#666',
     textDecorationLine: 'line-through',
   },
-
-  // Product Styles
   productsGrid: {
     paddingHorizontal: 10,
   },
@@ -637,8 +646,6 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 20,
   },
-
-  // Collection Grid Styles
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
