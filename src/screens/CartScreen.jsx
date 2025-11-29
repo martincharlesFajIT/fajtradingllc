@@ -389,7 +389,7 @@ const CartScreen = () => {
               <TouchableOpacity
                 style={styles.modalCancelButton}
                 onPress={() => {
-                  console.log('❌ CANCEL PRESSED');
+                  console.log('CANCEL PRESSED');
                   setItemToRemove(null);
                 }}
                 activeOpacity={0.7}
@@ -400,7 +400,7 @@ const CartScreen = () => {
               <TouchableOpacity
                 style={styles.modalConfirmButton}
                 onPress={() => {
-                  console.log('✅ REMOVE PRESSED');
+                  console.log('REMOVE PRESSED');
                   const idToRemove = itemToRemove;
                   setItemToRemove(null);
                   removeFromCart(idToRemove);
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   },
   clearButtonText: {
     fontSize: 14,
-    color: '#da4925ff',
+    color: '#7F131D',
     fontWeight: '600',
   },
   // User Info Banner Styles - NEW
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
   itemPrice: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#da4925ff',
+    color: '#7F131D',
     marginBottom: 8,
   },
   quantityContainer: {
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
   },
   removeButtonText: {
     fontSize: 16,
-    color: '#C62828',
+    color: '#7F131D',
     fontWeight: 'bold',
   },
   itemTotal: {
@@ -626,10 +626,10 @@ const styles = StyleSheet.create({
   totalValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#da4925ff',
+    color: '#7F131D',
   },
   checkoutButton: {
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#7F131D',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -660,10 +660,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     borderWidth: 2,
-    borderColor: '#da4925ff',
+    borderColor: '#7F131D',
   },
   continueButtonText: {
-    color: '#da4925ff',
+    color: '#7F131D',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   shopButton: {
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#7F131D',
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 8,
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
   },
   modalConfirmButton: {
     flex: 1,
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#7F131D',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',

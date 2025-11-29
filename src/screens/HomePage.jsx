@@ -28,7 +28,7 @@ const HomePage = () => {
     featured: {
       title: "Coffee Machines",
       handles: [
-        'professional-coffee-machines',
+        'professional-espresso-machines',
         'automatic-coffee-machine', 
         'coffee-equipment',
         'delonghi-automatic-coffee-machine'
@@ -59,7 +59,7 @@ const HomePage = () => {
     { 
       id: 1,
       name: 'Coffee Machine',
-      handle: 'professional-coffee-machines',
+      handle: 'professional-espresso-machines',
       image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_82110317-e2b4-47b5-8395-54aade9aaf0f_200x200.jpg?v=1746439090' 
     },
     { 
@@ -129,10 +129,10 @@ const HomePage = () => {
   useEffect(() => {
     const loadCoffeeMachines = async () => {
       try {
-        const products = await fetchProductsByCollection("professional-coffee-machines");
+        const products = await fetchProductsByCollection("professional-espresso-machines");
         setCoffeeMachines(products.products || products);
       } catch (error) {
-        console.error("Error fetching coffee machine products:", error);
+        console.error("Error fetching espresso-machines products:", error);
       } finally {
         setLoadingCoffee(false);
       }

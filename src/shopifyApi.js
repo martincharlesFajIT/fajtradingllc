@@ -13,6 +13,15 @@ export const fetchProductsByCollection = async (handle, first = 10, after = null
             node {
               id
               title
+              collections(first: 10) {
+                edges {
+                  node {
+                    id
+                    title
+                    handle
+                  }
+                }
+              }
               images(first: 1) {
                 edges {
                   node {
@@ -29,6 +38,9 @@ export const fetchProductsByCollection = async (handle, first = 10, after = null
                     }
                   }
                 }
+              }
+              brand: metafield(namespace: "custom", key: "brand") {
+                value
               }
             }
           }
@@ -63,12 +75,63 @@ export const fetchProductsByCollection = async (handle, first = 10, after = null
 
     const { edges, pageInfo } = json.data.collectionByHandle.products;
 
+    // Helper to parse brand metafield
+    const parseBrand = (brandMetafield) => {
+      if (!brandMetafield || !brandMetafield.value) return '';
+      
+      let value = brandMetafield.value;
+      
+      // Try to parse if it's JSON string
+      if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          
+          // If parsed is an array, join with comma
+          if (Array.isArray(parsed)) {
+            return parsed.join(', ');
+          }
+          
+          // If parsed is object with value property
+          if (typeof parsed === 'object' && parsed.value) {
+            return String(parsed.value);
+          }
+          
+          // If parsed is just a string
+          if (typeof parsed === 'string') {
+            return parsed;
+          }
+          
+          // Return stringified version if nothing else works
+          return String(parsed);
+        } catch (e) {
+          // If not JSON, return as is
+          return value;
+        }
+      }
+      
+      // If it's already an array
+      if (Array.isArray(value)) {
+        return value.join(', ');
+      }
+      
+      // Return as string
+      return String(value);
+    };
+
     return {
       products: edges.map(({ node }) => ({
         id: node.id,
         name: node.title,
         price: `${node.variants.edges[0].node.price.amount} ${node.variants.edges[0].node.price.currencyCode}`,
+        priceAmount: node.variants.edges[0].node.price.amount,
+        currencyCode: node.variants.edges[0].node.price.currencyCode,
         image: node.images.edges[0]?.node.url || "https://via.placeholder.com/200",
+        brand: parseBrand(node.brand),
+        collections: node.collections.edges.map(edge => ({
+          id: edge.node.id,
+          title: edge.node.title,
+          handle: edge.node.handle,
+        })),
       })),
       hasNextPage: pageInfo.hasNextPage,
       endCursor: pageInfo.endCursor,
@@ -201,27 +264,54 @@ export async function fetchMenuByHandle(handle) {
       return null;
     }
 
+    console.log('=== MENU FETCHED ===');
+    console.log('Menu Handle:', handle);
+    console.log('Menu Title:', menu.title);
+    console.log('Top-level items:', menu.items.length);
+
     // Recursive function to process menu items at any depth
     const processMenuItem = (item) => {
       const hasChildren = item.items && item.items.length > 0;
       
-      return {
+      // Extract handle from URL for easier matching
+      let itemHandle = null;
+      if (item.url) {
+        const match = item.url.match(/\/collections\/([^/?]+)/);
+        if (match) {
+          itemHandle = match[1];
+        }
+      }
+      
+      const processedItem = {
         id: item.id,
         title: item.title,
         url: item.url,
         type: item.type,
+        handle: itemHandle, // Add extracted handle
         hasChildren: hasChildren,
         children: hasChildren ? item.items.map(child => processMenuItem(child)) : []
       };
+      
+      console.log(`Processed menu item: ${item.title}, handle: ${itemHandle}, children: ${processedItem.children.length}`);
+      
+      return processedItem;
     };
 
     // Process all top-level menu items recursively
-    return menu.items.map(item => processMenuItem(item));
+    const processedMenu = menu.items.map(item => processMenuItem(item));
+    
+    console.log('=== MENU PROCESSED ===');
+    return processedMenu;
 
   } catch (error) {
     console.error("Error fetching menu:", handle, error);
     return null;
   }
+}
+
+// New function to fetch menu items for filters
+export async function fetchSidebarMenu() {
+  return fetchMenuByHandle('sidebar-collection');
 }
 
 export async function fetchProductById(productId) {
@@ -440,15 +530,15 @@ export async function createCheckout(lineItems, email = null, customerAccessToke
       input.buyerIdentity = {
         customerAccessToken: customerAccessToken
       };
-      console.log('✅ Cart will be associated with logged-in customer');
+      console.log('Cart will be associated with logged-in customer');
     } else if (email) {
       // If no access token but email provided, use email only
       input.buyerIdentity = {
         email: email
       };
-      console.log('✅ Cart will use guest email:', email);
+      console.log(' Cart will use guest email:', email);
     } else {
-      console.log('ℹ️ Creating guest cart (no customer association)');
+      console.log('ℹ Creating guest cart (no customer association)');
     }
 
     console.log('Cart Input:', JSON.stringify(input, null, 2));
@@ -788,7 +878,7 @@ export async function customerUpdate(accessToken, firstName, lastName) {
     console.log('Last Name:', lastName);
 
     if (!accessToken || typeof accessToken !== 'string' || accessToken.trim() === '') {
-      console.error('❌ Invalid access token');
+      console.error(' Invalid access token');
       return { 
         success: false, 
         errors: [{ message: 'Invalid access token. Please sign in again.' }] 
@@ -796,7 +886,7 @@ export async function customerUpdate(accessToken, firstName, lastName) {
     }
 
     if (!firstName || !lastName) {
-      console.error('❌ Missing name fields');
+      console.error(' Missing name fields');
       return { 
         success: false, 
         errors: [{ message: 'First name and last name are required' }] 
@@ -826,7 +916,7 @@ export async function customerUpdate(accessToken, firstName, lastName) {
     });
 
     if (!response.ok) {
-      console.error('❌ HTTP Error:', response.status);
+      console.error(' HTTP Error:', response.status);
       return { 
         success: false, 
         errors: [{ message: `HTTP Error: ${response.status}` }] 
@@ -839,27 +929,27 @@ export async function customerUpdate(accessToken, firstName, lastName) {
     console.log('===================');
 
     if (result.errors) {
-      console.error("❌ GraphQL errors:", result.errors);
+      console.error(" GraphQL errors:", result.errors);
       return { success: false, errors: result.errors };
     }
 
     if (result.data?.customerUpdate?.customerUserErrors?.length > 0) {
       const errors = result.data.customerUpdate.customerUserErrors;
-      console.error("❌ Customer update errors:", errors);
+      console.error(" Customer update errors:", errors);
       return { success: false, errors };
     }
 
     const customer = result.data?.customerUpdate?.customer;
     
     if (!customer) {
-      console.error('❌ No customer data returned');
+      console.error(' No customer data returned');
       return { 
         success: false, 
         errors: [{ message: "Failed to update profile" }] 
       };
     }
 
-    console.log('✅ Customer updated successfully');
+    console.log(' Customer updated successfully');
     console.log('Updated customer:', customer);
     console.log('=== END ===');
 
@@ -874,7 +964,7 @@ export async function customerUpdate(accessToken, firstName, lastName) {
     };
 
   } catch (error) {
-    console.error("❌ Exception in customerUpdate:", error);
+    console.error(" Exception in customerUpdate:", error);
     return { 
       success: false, 
       errors: [{ message: error.message || 'Unknown error occurred' }] 

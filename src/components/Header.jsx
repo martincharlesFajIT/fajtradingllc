@@ -42,7 +42,7 @@ const Header = () => {
   const navigation = useNavigation();
   const { getCartCount } = useCart();
   const { isSignedIn, user, accessToken, signIn, signUp, signOut, updateUserData } = useAuth();
-  
+
   const [cartCount, setCartCount] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
@@ -67,7 +67,7 @@ const Header = () => {
       try {
         const response = await fetch('http://ip-api.com/json/');
         const data = await response.json();
-        
+
         if (data.status === 'success') {
           if (data.city && data.country) {
             setLocation(`${data.city}, ${data.country}`);
@@ -154,7 +154,7 @@ const Header = () => {
     setSearchResults([]);
     setIsSearchFocused(false);
     Keyboard.dismiss();
-    
+
     navigation.navigate('ProductDetail', {
       productId: product.id,
       productName: product.name
@@ -239,7 +239,7 @@ const Header = () => {
   return (
     <View style={styles.container}>
       <View style={styles.topSection}>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={toggleMenu}
           style={styles.menuButton}
           activeOpacity={0.7}
@@ -247,11 +247,15 @@ const Header = () => {
           <Icon name="menu" size={28} color="#FFFFFF" />
         </TouchableOpacity>
 
-        <Text style={styles.logo}>FAJ TRADING LLC</Text>
-        
+        <Image
+          source={require('../assets/images/logo.webp')}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
+
         <View style={styles.rightSection}>
-          <TouchableOpacity 
-            style={styles.iconButton} 
+          <TouchableOpacity
+            style={styles.iconButton}
             onPress={handleCartPress}
             activeOpacity={0.7}
           >
@@ -322,12 +326,6 @@ const Header = () => {
         )}
       </View>
 
-      <View style={styles.locationSection}>
-        <Ionicons name="location-sharp" size={16} color="#ff4c4cff" style={styles.locationIcon} />
-        <Text style={styles.locationText}>Deliver to {location}</Text>
-        <Icon name="chevron-down" size={14} color="#FFFFFF" />
-      </View>
-
       {/* Side Menu Modal */}
       <Modal
         visible={isMenuOpen}
@@ -345,7 +343,7 @@ const Header = () => {
           >
             <View style={styles.overlay} />
           </TouchableOpacity>
-          
+
           <Animated.View
             style={[
               styles.sideMenu,
@@ -361,7 +359,7 @@ const Header = () => {
                 <Icon name="close" size={28} color="#333" />
               </TouchableOpacity>
             </View>
-            
+
             <View style={styles.menuContent}>
               <View style={styles.userSection}>
                 <View style={styles.userAvatar}>
@@ -393,7 +391,7 @@ const Header = () => {
               </View>
 
               {!isSignedIn ? (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.signInButton}
                   onPress={handleSignInPress}
                   activeOpacity={0.7}
@@ -401,7 +399,7 @@ const Header = () => {
                   <Text style={styles.signInButtonText}>Sign In / Sign Up</Text>
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.signOutButton}
                   onPress={handleSignOut}
                   activeOpacity={0.7}
@@ -413,7 +411,7 @@ const Header = () => {
               {/* Static Menu Pages */}
               <View style={styles.menuPagesSection}>
                 <Text style={styles.menuPagesTitle}>Information</Text>
-                
+
                 <TouchableOpacity
                   style={styles.menuPageItem}
                   onPress={() => {
@@ -517,26 +515,29 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 50 : 10,
     paddingBottom: 10,
   },
-  topSection: {
+ topSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 12,
+    height: 100,
   },
   menuButton: {
     padding: 8,
-    marginRight: 10,
+    width: 44, 
   },
-  logo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FF0000',
-    flex: 1,
+  logoImage: {
+    width: 220, 
+    height: 70,
+    position: 'absolute',
+    left: '50%',
+    marginLeft: -100,
   },
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
+    width: 44,
   },
   iconButton: {
     position: 'relative',
@@ -678,7 +679,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
   },
-  
+
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

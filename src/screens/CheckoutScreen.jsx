@@ -30,7 +30,7 @@ const CheckoutScreen = () => {
     
     // Check if user is trying to sign in
     if (url.includes('/account/login') || url.includes('/account/register')) {
-      console.log('🔐 User trying to sign in at checkout');
+      console.log(' User trying to sign in at checkout');
       
       // Show our custom auth modal instead
       setIsAuthModalVisible(true);
@@ -42,10 +42,10 @@ const CheckoutScreen = () => {
     
     // Check if checkout is complete
     if (url.includes('/thank_you') || url.includes('/orders/')) {
-      console.log('✅ Order completed successfully!');
+      console.log(' Order completed successfully!');
       
       if (isSignedIn && user) {
-        console.log(`🎉 Order created for customer: ${user.email}`);
+        console.log(` Order created for customer: ${user.email}`);
       }
       
       clearCart();
@@ -54,7 +54,7 @@ const CheckoutScreen = () => {
   };
 
   const handleSignInSuccess = () => {
-    console.log('✅ User signed in successfully');
+    console.log(' User signed in successfully');
     setIsAuthModalVisible(false);
     
     Alert.alert(
@@ -64,7 +64,7 @@ const CheckoutScreen = () => {
         {
           text: 'Go to Cart',
           onPress: () => {
-            navigation.goBack(); // Go back to cart to recreate checkout
+            navigation.goBack();
           }
         }
       ]
