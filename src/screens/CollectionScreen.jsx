@@ -770,11 +770,11 @@ const styles = StyleSheet.create({
   productInfo: { padding: 12 },
   productName: { fontSize: 14, fontWeight: '500', color: '#232F3E', marginBottom: 4, minHeight: 35 },
   productBrand: { fontSize: 12, color: '#666', marginBottom: 4 },
-  productPrice: { fontSize: 16, fontWeight: 'bold', color: '#da4925ff' },
+  productPrice: { fontSize: 16, fontWeight: 'bold', color: '#7F141E' },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40, paddingVertical: 60 },
   emptyTitle: { fontSize: 20, fontWeight: 'bold', color: '#232F3E', marginBottom: 10, textAlign: 'center' },
   emptySubtitle: { fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 30, lineHeight: 22 },
-  retryButton: { backgroundColor: '#da4925ff', paddingHorizontal: 30, paddingVertical: 12, borderRadius: 6 },
+  retryButton: { backgroundColor: '#7F141E', paddingHorizontal: 30, paddingVertical: 12, borderRadius: 6 },
   retryButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
 
   // Modal Styles
@@ -857,7 +857,7 @@ const styles = StyleSheet.create({
   },
   sliderFill: {
     height: '100%',
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#7F141E',
     borderRadius: 3,
     position: 'absolute',
   },
@@ -865,7 +865,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#7F141E',
     position: 'absolute',
     top: -9,
     marginLeft: -12,
@@ -900,8 +900,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkboxChecked: {
-    backgroundColor: '#da4925ff',
-    borderColor: '#da4925ff',
+    backgroundColor: '#7F141E',
+    borderColor: '#7F141E',
   },
   checkmark: {
     color: '#FFFFFF',
@@ -933,7 +933,7 @@ const styles = StyleSheet.create({
   },
   applyButton: {
     flex: 1,
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#7F141E',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
