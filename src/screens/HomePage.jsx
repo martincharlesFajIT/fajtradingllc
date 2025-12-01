@@ -29,7 +29,7 @@ const HomePage = () => {
       title: "Coffee Machines",
       handles: [
         'professional-espresso-machines',
-        'automatic-coffee-machine', 
+        'automatic-coffee-machine',
         'coffee-equipment',
         'delonghi-automatic-coffee-machine'
       ]
@@ -44,78 +44,87 @@ const HomePage = () => {
       ]
     },
     Electronics: {
-      title: "Electronic", 
+      title: "Electronic",
       handles: [
         'energy-power-quality-analyzer',
         'electrical-and-electronics',
         'stabilizer-and-transformer',
         'dehumidifier'
       ]
+    },
+    commercialequipment: {
+      title: "Commercial Equipment",
+      handles: [
+        'laundry-equipment',
+        'refrigeration-equipment',
+        'air-conditioners',
+        'kitchen-equipment'
+      ]
     }
   };
 
   // Categories with their Shopify collection handles
   const categories = [
-    { 
+    {
       id: 1,
       name: 'Coffee Machine',
       handle: 'professional-espresso-machines',
-      image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_82110317-e2b4-47b5-8395-54aade9aaf0f_200x200.jpg?v=1746439090' 
+      image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_82110317-e2b4-47b5-8395-54aade9aaf0f_200x200.jpg?v=1746439090'
     },
-    { 
-      id: 2, 
+    {
+      id: 2,
       name: 'Vacuum Cleaner',
       handle: 'robot-vacuum-cleaners',
-      image: 'https://www.fajtradingllc.com/cdn/shop/collections/robotic-vacuum-cleaner_a0aa2b94-945e-4fa8-8990-8a02e39273e7_375x.jpg?v=1746444970' 
+      image: 'https://www.fajtradingllc.com/cdn/shop/collections/robotic-vacuum-cleaner_a0aa2b94-945e-4fa8-8990-8a02e39273e7_375x.jpg?v=1746444970'
     },
-    { 
-      id: 3, 
+    {
+      id: 3,
       name: 'Washing Machine',
       handle: 'washing-machines',
-      image: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=300&h=400&fit=crop&crop=center' 
+      image: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=300&h=400&fit=crop&crop=center'
     },
-    { 
+    {
       id: 4,
-      name: 'Cookers', 
+      name: 'Cookers',
       handle: 'cookers',
-      image: 'https://www.fajtradingllc.com/cdn/shop/collections/Dr_Coffee_F11_Pro_Fully_Automatic_Coffee_Machine_535x.png?v=1746437119' 
+      image: 'https://www.fajtradingllc.com/cdn/shop/collections/Dr_Coffee_F11_Pro_Fully_Automatic_Coffee_Machine_535x.png?v=1746437119'
     },
-    { 
-      id: 5, 
-      name: 'Air Conditioner', 
+    {
+      id: 5,
+      name: 'Air Conditioner',
       handle: 'air-conditioners',
-      image: 'https://www.fajtradingllc.com/cdn/shop/collections/ac_39ccf573-4268-48b7-bfb6-c90f3ea4fc32_535x.jpg?v=1746443774' 
+      image: 'https://www.fajtradingllc.com/cdn/shop/collections/ac_39ccf573-4268-48b7-bfb6-c90f3ea4fc32_535x.jpg?v=1746443774'
     },
-    { 
-      id: 6, 
-      name: 'Dishwasher', 
+    {
+      id: 6,
+      name: 'Dishwasher',
       handle: 'dishwashers',
-      image: 'https://cdn.shopify.com/s/files/1/0706/8139/5436/collections/dishwasher.jpg?v=1746440666' 
+      image: 'https://cdn.shopify.com/s/files/1/0706/8139/5436/collections/dishwasher.jpg?v=1746440666'
     },
-    { 
-      id: 7, 
-      name: 'Refrigerators', 
+    {
+      id: 7,
+      name: 'Refrigerators',
       handle: 'refrigerator',
-      image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_375x.jpg?v=1746432020' 
+      image: 'https://www.fajtradingllc.com/cdn/shop/collections/refrigerator_375x.jpg?v=1746432020'
     },
   ];
 
   const loadCollections = async (groupKey, handles) => {
     try {
       setLoading(prev => ({ ...prev, [groupKey]: true }));
-      
+
       const collectionPromises = handles.map(handle =>
         fetchCollectionByHandle(handle)
       );
-      
+
       const results = await Promise.all(collectionPromises);
       const validCollections = results.filter(collection => collection !== null);
-      
+
       setCollections(prev => ({
         ...prev,
         [groupKey]: validCollections
       }));
-      
+
     } catch (error) {
       console.error(`Error fetching ${groupKey} collections:`, error);
     } finally {
@@ -147,9 +156,8 @@ const HomePage = () => {
   }, []);
 
   const bannerData = [
-    { id: 1, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcK6Z2RB7mrb6haKMoFcmz_6JyFaK7r1m5Wg&s' },
-    { id: 2, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcK6Z2RB7mrb6haKMoFcmz_6JyFaK7r1m5Wg&s' },
-    { id: 3, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcK6Z2RB7mrb6haKMoFcmz_6JyFaK7r1m5Wg&s' },
+    { id: 1, image: 'https://cdn.shopify.com/s/files/1/0706/8139/5436/files/mobile_app_banner.jpg?v=1764572984' },
+    { id: 2, image: 'https://cdn.shopify.com/s/files/1/0706/8139/5436/files/Faj_Trading_llc_Mobile_Banner_2-01_1.jpg?v=1764576243' },
   ];
 
   // Auto-slide effect for banner
@@ -159,14 +167,14 @@ const HomePage = () => {
     const interval = setInterval(() => {
       setCurrentBannerIndex((prevIndex) => {
         const nextIndex = (prevIndex + 1) % bannerData.length;
-        
+
         if (bannerRef.current) {
           bannerRef.current.scrollToIndex({
             index: nextIndex,
             animated: true,
           });
         }
-        
+
         return nextIndex;
       });
     }, 3000);
@@ -181,24 +189,155 @@ const HomePage = () => {
   };
 
   const deals = [
-    { id: 1, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc4aSsFA96t5sfaxwxD8bbbDzYnusOissMZA&s' },
-    { id: 2, image: 'https://down-sg.img.susercontent.com/file/cn-11134207-7ras8-m6evdp35a2fn73'},
-    { id: 3, image: 'https://cumuluscoffee.com/cdn/shop/files/image6344284.jpg?v=1750178201&width=2475'},
+    { id: 1, image: 'https://www.fajtradingllc.com/cdn/shop/files/De_Longhi_ECAM450.55.G_Eletta_Explore_Grey_Automatic_Coffee_Machine_-_Black_7c7c3f85-d7a1-4ce5-853e-245beb9e93a6_375x.jpg?v=1738126233',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'de-longhi-dedica-arte-pump-espresso',
+      title: 'Delonghi Dedica Arte Pump' 
+      }
+    },
+    { id: 2, image: 'https://www.fajtradingllc.com/cdn/shop/files/Marco_T20_Ecoboiler_20Ltr_Automatic_Hot_Water_Boiler_3b028443-8d3c-4215-90ab-7d794929cfa9_375x.jpg?v=1738125949',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'automatic-coffee-machine',
+      title: 'Automatic Coffee Machines' 
+      }
+    },
+    { id: 3, image: 'https://www.fajtradingllc.com/cdn/shop/files/espresso_machine_375x.jpg?v=1738125802',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'espresso-machines',
+      title: 'Espresso Machines' 
+      }
+    },
+    { id: 4, image: 'https://www.fajtradingllc.com/cdn/shop/files/La_Marzocco_Linea_PB_3_Group_AV_Automatic_Espresso_Machine_ff577260-890b-424d-9d4a-0bd7ded64467_11zon_375x.jpg?v=1744962755',
+      link: 'CollectionProducts',
+      params: { 
+      handle: '3-group-espresso-machines',
+      title: '3 Group Espresso Machines' 
+      }
+    },
+    { id: 5, image: 'https://www.fajtradingllc.com/cdn/shop/files/single_group_375x.jpg?v=1738125898',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'single-group-espresso-machine',
+      title: 'Single Group Espresso Machine' 
+      }
+    },
+    { id: 6, image: 'https://www.fajtradingllc.com/cdn/shop/files/2_group_espresso_machine_375x.jpg?v=1738125660',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'single-group-espresso-machine',
+      title: 'Single Group Espresso Machine' 
+      }
+    },
   ];
 
-  const shopsave = [
-    { id: 1, name: 'How to get free deliveries', image: 'https://img.freepik.com/premium-photo/delivery-man-red-uniform-holding-phone-with-blank-screen-custom-app-promotion-branding_1267867-19074.jpg?w=360'},
-    { id: 2, name: 'How to Return an items',  image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNORpbLTSRP4WB99TmvnQ3aLCAKxlkruStYZeWJ_IeVIFbWAQnBWG4tTzZaLWH09GG4yc&usqp=CAU'},
-    { id: 3, name: 'How to contact us',  image: 'https://img.freepik.com/premium-photo/delivery-man-red-uniform-holding-phone-with-blank-screen-custom-app-promotion-branding_1267867-19062.jpg?w=360'},
-    { id: 4, name: 'How to pay with cash',  image: 'https://images.pond5.com/back-rear-view-delivery-young-footage-136281600_iconl.jpeg'},
-    { id: 5, name: 'How to place an order',  image: 'https://www.shutterstock.com/shutterstock/videos/1092499343/thumb/4.jpg?ip=x480'},
-    { id: 6, name: 'How to create a new account',  image: 'https://thumbs.dreamstime.com/b/handwriting-text-writing-login-concept-meaning-entering-website-blog-using-username-password-registration-halftone-blank-180749996.jpg'},
+  const Homeappliancedeals = [
+    { id: 1, image: 'https://www.fajtradingllc.com/cdn/shop/files/ac_f1c5368e-ebfb-4759-a1c3-95e800b9af98_375x.jpg?v=1737702308',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'air-conditioners',
+      title: 'Air Conditioners' 
+      }
+    },
+    { id: 2, image: 'https://www.fajtradingllc.com/cdn/shop/files/washing-machine_92906805-21f3-462d-aa17-b7a35fefcbfa_375x.jpg?v=1738044028',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'washing-machines',
+      title: 'Washing Machine' 
+      }
+    },
+    { id: 3, image: 'https://www.fajtradingllc.com/cdn/shop/files/oven_4b038e12-1edd-4afd-a552-c9246a4f662c_375x.jpg?v=1738131296',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'ovens',
+      title: 'Ovens' 
+      }
+    },
+    { id: 4, image: 'https://www.fajtradingllc.com/cdn/shop/files/refrigerator_cb6510b3-e870-4829-a047-48b417e9f806_375x.jpg?v=1738131138',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'refrigerators',
+      title: 'Refrigerator' 
+      }
+    },
+     { id: 5, image: 'http://fajtradingllc.com/cdn/shop/files/dishwasher_fb5b1d17-9b30-4b0b-bf75-7d52f364ba94_375x.jpg?v=1737702362',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'dishwashers',
+      title: 'Dishwasher' 
+      }
+    },
+    { id: 6, image: 'https://www.fajtradingllc.com/cdn/shop/files/grinder_375x.jpg?v=1738131395',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'mixer-grinder',
+      title: 'Mixer Grinder' 
+      }
+    },
   ];
 
-  const featuredpartners = [
-    { id: 1, name: 'Gaming Laptop', originalPrice: '$199.99', salePrice: '$899.99', image: 'https://cumuluscoffee.com/cdn/shop/files/image6344284.jpg?v=1750178201&width=2475', discount: '31%' },
-    { id: 2, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzXB4-Y4B_3R3GUH04tTjmMQx7VbUfA-pkuA&s', discount: '40%' },
-    { id: 3, name: 'Coffee Maker', originalPrice: '$149.99', salePrice: '$89.99', image: 'https://via.placeholder.com/200x150/000000/FFFFFF?text=Coffee', discount: '40%' },
+  const electronicdeals = [
+    { id: 1, image: 'https://www.fajtradingllc.com/cdn/shop/files/IC3-Converter-RS232-RS485_375x.jpg?v=1738556122',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'energy-power-quality-analyzer',
+      title: 'Janitza Power Supply Analyzer' 
+      }
+    },
+    { id: 2, image: 'https://www.fajtradingllc.com/cdn/shop/files/TRM210-PID-Controller_1_375x.jpg?v=1738556196',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'energy-power-quality-analyzer',
+      title: 'Energy Power Quality Analyzer' 
+      }
+    },
+    { id: 3, image: 'https://www.fajtradingllc.com/cdn/shop/files/H248f55ec5705419da73908098388c591Q_720x.jpg?v=1757919883',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'stabilizer-and-transformer',
+      title: 'Stabilizer and Transformer' 
+      }
+    },
+    { id: 4, image: 'https://www.fajtradingllc.com/cdn/shop/files/1_5f368c1b-2f49-429f-9790-077a7a76654e_375x.jpg?v=1739765733',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'dehumidifier',
+      title: 'Dehumidifier'
+      }
+    },
+  ];
+
+  const commercialequipmentdeals = [
+    { id: 1, image: 'https://www.fajtradingllc.com/cdn/shop/files/portable_air_condition_375x.png?v=1738151645',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'floor-standing',
+      title: 'Floor Standing' 
+      }
+    },
+    { id: 2, image: 'https://www.fajtradingllc.com/cdn/shop/files/fridge_1_1_375x.png?v=1738151432',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'refrigerators',
+      title: 'Refrigerators' 
+      }
+    },
+    { id: 3, image: 'https://www.fajtradingllc.com/cdn/shop/files/fridge_2_1_375x.png?v=1738152093',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'refrigeration-equipment',
+      title: 'Refrigeration Equipment' 
+      }
+    },
+    { id: 4, image: 'https://www.fajtradingllc.com/cdn/shop/files/spli_air_condition_375x.png?v=1738151394',
+      link: 'CollectionProducts',
+      params: { 
+      handle: 'air-conditioners',
+      title: 'Air Conditioners'
+      }
+    },
   ];
 
   const CollectionGrid = ({ groupKey, title }) => {
@@ -227,9 +366,9 @@ const HomePage = () => {
                 style={styles.gridItem}
                 onPress={() => {
                   console.log("Navigate to collection:", item.title, item.handle);
-                  navigation.navigate('CollectionProducts', { 
-                    handle: item.handle, 
-                    title: item.title 
+                  navigation.navigate('CollectionProducts', {
+                    handle: item.handle,
+                    title: item.title
                   });
                 }}
               >
@@ -264,13 +403,13 @@ const HomePage = () => {
 
   // Updated renderCategory to make it clickable
   const renderCategory = ({ item }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.categoryItem}
       onPress={() => {
         console.log("🔗 Navigate to category:", item.name, "handle:", item.handle);
-        navigation.navigate('CollectionProducts', { 
-          handle: item.handle, 
-          title: item.name 
+        navigation.navigate('CollectionProducts', {
+          handle: item.handle,
+          title: item.name
         });
       }}
       activeOpacity={0.8}
@@ -282,56 +421,96 @@ const HomePage = () => {
     </TouchableOpacity>
   );
 
-  const renderProduct = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.productItem}
-      onPress={() => {
-        console.log("Navigate to product:", item.name);
-      }}
-    >
-      <Image source={{ uri: item.image }} style={styles.productImage} />
-      <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
-        <Text style={styles.productPrice}>
-          {parseFloat(item.price).toLocaleString("en-US", {
-            style: "currency",
-            currency: "aed",
-          })}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderDeal = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.dealItem}
-      onPress={() => {
-        console.log("Navigate to deal:", item.name);
-      }}>
-      <Image source={{ uri: item.image }} style={styles.dealImage} />
+const renderDeal = ({ item }) => (
+  <TouchableOpacity
+    style={styles.dealItem}
+    onPress={() => {
+      console.log("Navigate to:", item.params?.title || item.name);
+      if (item.link && item.params) {
+        navigation.navigate(item.link, item.params);
+      }
+    }}
+    activeOpacity={0.7}
+  >
+    <Image source={{ uri: item.image }} style={styles.dealImage} />
+    {item.name && (
       <View style={styles.dealInfo}>
         <Text style={styles.dealName} numberOfLines={1}>{item.name}</Text>
-        <View style={styles.priceContainer}>
-          <Text style={styles.salePrice}>{item.salePrice}</Text>
-          <Text style={styles.originalPrice}>{item.originalPrice}</Text>
-        </View>
+        {item.salePrice && (
+          <View style={styles.priceContainer}>
+            <Text style={styles.salePrice}>{item.salePrice}</Text>
+            {item.originalPrice && (
+              <Text style={styles.originalPrice}>{item.originalPrice}</Text>
+            )}
+          </View>
+        )}
       </View>
-    </TouchableOpacity>
-  );
+    )}
+  </TouchableOpacity>
+);
 
-  const saveshop = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.dealItem}
-      onPress={() => {
-        console.log("Navigate to deal:", item.name);
-      }}
-    >
-      <Image source={{ uri: item.image }} style={styles.dealImage} />
-      <View style={styles.dealInfo}>      
-        <Text style={styles.dealName} numberOfLines={1}>{item.name}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+ const Homeapplianceslider = ({ item }) => (
+  <TouchableOpacity
+    style={styles.dealItem}
+    onPress={() => {
+      console.log("Navigate to:", item.params?.title);
+      if (item.link && item.params) {
+        navigation.navigate(item.link, item.params);
+      }
+    }}
+    activeOpacity={0.7}
+  >
+    <Image source={{ uri: item.image }} style={styles.dealImage} />
+  </TouchableOpacity>
+);
+
+const electronicslider = ({ item }) => (
+  <TouchableOpacity
+    style={styles.dealItem}
+    onPress={() => {
+      console.log("Navigate to:", item.params?.title);
+      if (item.link && item.params) {
+        navigation.navigate(item.link, item.params);
+      }
+    }}
+    activeOpacity={0.7}
+  >
+    <Image source={{ uri: item.image }} style={styles.dealImage} />
+  </TouchableOpacity>
+);
+
+const commercialslider = ({ item }) => (
+  <TouchableOpacity
+    style={styles.dealItem}
+    onPress={() => {
+      console.log("Navigate to:", item.params?.title);
+      if (item.link && item.params) {
+        navigation.navigate(item.link, item.params);
+      }
+    }}
+    activeOpacity={0.7}
+  >
+    <Image source={{ uri: item.image }} style={styles.dealImage} />
+  </TouchableOpacity>
+);
+
+  // const saveshop = ({ item }) => (
+  //   <TouchableOpacity
+  //     style={styles.dealItem}
+  //     onPress={() => {
+  //       console.log("Navigate to:", item.name);
+  //       if (item.link && item.params) {
+  //         navigation.navigate(item.link, item.params);
+  //       }
+  //     }}
+  //     activeOpacity={0.7}
+  //   >
+  //     <Image source={{ uri: item.image }} style={styles.dealImage} />
+  //     <View style={styles.dealInfo}>
+  //       <Text style={styles.dealName} numberOfLines={1}>{item.name}</Text>
+  //     </View>
+  //   </TouchableOpacity>
+  // );
 
   return (
     <View style={styles.container}>
@@ -354,23 +533,6 @@ const HomePage = () => {
               console.log('Banner scroll failed:', info);
             }}
           />
-          
-          {/* Banner Indicators */}
-          <View style={styles.bannerIndicators}>
-            {bannerData.map((_, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.indicator,
-                  currentBannerIndex === index && styles.activeIndicator
-                ]}
-                onPress={() => {
-                  setCurrentBannerIndex(index);
-                  bannerRef.current?.scrollToIndex({ index, animated: true });
-                }}
-              />
-            ))}
-          </View>
         </View>
 
         {/* Categories - Now Clickable! */}
@@ -386,40 +548,10 @@ const HomePage = () => {
           />
         </View>
 
-        {/* Sponsor Products */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Sponsor Products</Text>
-          </View>
-          <FlatList
-            data={deals}
-            renderItem={renderDeal}
-            keyExtractor={(item) => item.id.toString()}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.dealsContainer}
-          />
-        </View>
-
-         {/* Featured by Partners */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Featured by Partners</Text>
-          </View>
-          <FlatList
-            data={featuredpartners}
-            renderItem={renderDeal}
-            keyExtractor={(item) => item.id.toString()}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.dealsContainer}
-          />
-        </View>
-
         {/* Dynamic Collection Grids */}
         <CollectionGrid groupKey="featured" title="Coffee Machines" />
 
-         {/* Get Discount on Coffee machine */}
+        {/* Get Discount on Coffee machine */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Get Discount on Coffee machine</Text>
@@ -433,18 +565,49 @@ const HomePage = () => {
             contentContainerStyle={styles.dealsContainer}
           />
         </View>
-        
-        <CollectionGrid groupKey="homeAppliances" title="Home Appliances" />
-        <CollectionGrid groupKey="Electronics" title="Electronics" />
 
-        {/* Save and Shop Slider */}
+        <CollectionGrid groupKey="homeAppliances" title="Home Appliances" />
+         {/* Get Discount on Home Appliance */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Shop & save on FAJ Tradding LLC</Text>
+            <Text style={styles.sectionTitle}>Get Discount on Home Appliances</Text>
           </View>
           <FlatList
-            data={shopsave}
-            renderItem={saveshop}
+            data={Homeappliancedeals}
+            renderItem={Homeapplianceslider}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.dealsContainer}
+          />
+        </View>
+
+        
+        <CollectionGrid groupKey="Electronics" title="Electronics" />
+        {/* Get Discount on Electronics */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Get Discount on Stabilizer's & Energy Meter's</Text>
+          </View>
+          <FlatList
+            data={electronicdeals}
+            renderItem={electronicslider}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.dealsContainer}
+          />
+        </View>
+
+        <CollectionGrid groupKey="commercialequipment" title="Commercial Equipment" />
+        {/* Get Discount on Electronics */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Get Discount on Stabilizer's & Energy Meter's</Text>
+          </View>
+          <FlatList
+            data={commercialequipmentdeals}
+            renderItem={commercialslider}
             keyExtractor={(item) => item.id.toString()}
             horizontal
             showsHorizontalScrollIndicator={false}

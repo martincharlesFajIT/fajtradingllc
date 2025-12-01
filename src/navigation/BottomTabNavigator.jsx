@@ -1,4 +1,5 @@
 import React from 'react';
+import { Image } from 'react-native'; // Add Image import
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import SearchScreen from '../screens/SearchScreen';
@@ -36,7 +37,7 @@ const MenuStack = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MenuMain" component={MenuScreen} />
       <Stack.Screen name="CollectionProducts" component={CollectionScreen} />
-       <Stack.Screen name="Search" component={SearchScreen} />
+      <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
     </Stack.Navigator>
   );
@@ -75,33 +76,41 @@ const BottomTabNavigator = () => {
         },
       }}
     >
-     <Tab.Screen
-  name="Home"
-  component={HomeStack}
-  options={{
-    tabBarIcon: ({ color, size }) => (
-      <Ionicons name="home-outline" size={size} color={color} />
-    ),
-  }}
-/>
-     <Tab.Screen
-  name="Menu"
-  component={MenuStack}
-  options={{
-    tabBarIcon: ({ color, size }) => (
-      <Ionicons name="menu-outline" size={size} color={color} />
-    ),
-  }}
-/>
-     <Tab.Screen
-  name="Cart"
-  component={CartStack}
-  options={{
-    tabBarIcon: ({ color, size }) => (
-      <Ionicons name="cart-outline" size={size} color={color} />
-    ),
-  }}
-/>
+      <Tab.Screen
+        name="Home"
+        component={HomeStack}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Menu"
+        component={MenuStack}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="menu-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Cart"
+        component={CartStack}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require('../assets/images/cart.png')}
+              style={{
+                width: size,
+                height: size,
+                tintColor: color, 
+              }}
+              resizeMode="contain"
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };

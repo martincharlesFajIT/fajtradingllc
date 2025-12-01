@@ -25,7 +25,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 const Icon = ({ name, size, color, style }) => {
   const iconMap = {
     'menu': '☰',
-    'cart-outline': '🛒',
+
     'search': '🔍',
     'mic-outline': '🎤',
     'location-sharp': '📍',
@@ -48,7 +48,7 @@ const Header = () => {
   const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
   const [isEditProfileModalVisible, setIsEditProfileModalVisible] = useState(false);
   const [slideAnim] = useState(() => new Animated.Value(-width));
-  const [location, setLocation] = useState('Loading...');
+  // const [location, setLocation] = useState('Loading...');
 
   // Search states
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,31 +62,31 @@ const Header = () => {
     setCartCount(count);
   }, [getCartCount]);
 
-  useEffect(() => {
-    const detectLocation = async () => {
-      try {
-        const response = await fetch('http://ip-api.com/json/');
-        const data = await response.json();
+  // useEffect(() => {
+  //   const detectLocation = async () => {
+  //     try {
+  //       const response = await fetch('http://ip-api.com/json/');
+  //       const data = await response.json();
 
-        if (data.status === 'success') {
-          if (data.city && data.country) {
-            setLocation(`${data.city}, ${data.country}`);
-          } else if (data.country) {
-            setLocation(data.country);
-          } else {
-            setLocation('Location unavailable');
-          }
-        } else {
-          setLocation('Pakistan');
-        }
-      } catch (error) {
-        console.error('Error detecting location:', error);
-        setLocation('Pakistan');
-      }
-    };
+  //       if (data.status === 'success') {
+  //         if (data.city && data.country) {
+  //           setLocation(`${data.city}, ${data.country}`);
+  //         } else if (data.country) {
+  //           setLocation(data.country);
+  //         } else {
+  //           setLocation('Location unavailable');
+  //         }
+  //       } else {
+  //         setLocation('Pakistan');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error detecting location:', error);
+  //       setLocation('Pakistan');
+  //     }
+  //   };
 
-    detectLocation();
-  }, []);
+  //   detectLocation();
+  // }, []);
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -137,7 +137,6 @@ const Header = () => {
   };
 
   const handleSearchBlur = () => {
-    // Delay to allow clicking on results
     setTimeout(() => {
       setIsSearchFocused(false);
     }, 200);
@@ -244,28 +243,32 @@ const Header = () => {
           style={styles.menuButton}
           activeOpacity={0.7}
         >
-          <Icon name="menu" size={28} color="#FFFFFF" />
+          <Icon name="menu" size={28} color="#030303ff" />
         </TouchableOpacity>
 
         <Image
-          source={require('../assets/images/logo.webp')}
+          source={require('../assets/images/redlogo.webp')}
           style={styles.logoImage}
           resizeMode="contain"
         />
 
         <View style={styles.rightSection}>
           <TouchableOpacity
-            style={styles.iconButton}
-            onPress={handleCartPress}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="cart-outline" size={28} color="#FFFFFF" />
-            {cartCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{cartCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+      style={styles.iconButton}
+      onPress={handleCartPress}
+      activeOpacity={0.7}
+    >
+      <Image
+        source={require('../assets/images/cart.png')}
+        style={styles.cartIcon}
+        resizeMode="contain"
+      />
+      {cartCount > 0 && (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{cartCount}</Text>
+        </View>
+      )}
+    </TouchableOpacity>
         </View>
       </View>
 
@@ -295,7 +298,7 @@ const Header = () => {
             </TouchableOpacity>
           )}
           {isSearching && (
-            <ActivityIndicator size="small" color="#FF9900" style={styles.searchLoader} />
+            <ActivityIndicator size="small" color="#000000" style={styles.searchLoader} />
           )}
         </View>
 
@@ -304,7 +307,7 @@ const Header = () => {
           <View style={styles.searchDropdown}>
             {isSearching ? (
               <View style={styles.searchLoadingContainer}>
-                <ActivityIndicator size="small" color="#FF9900" />
+                <ActivityIndicator size="small" color="#000000" />
                 <Text style={styles.searchLoadingText}>Searching...</Text>
               </View>
             ) : searchResults.length > 0 ? (
@@ -376,7 +379,7 @@ const Header = () => {
                         onPress={handleEditProfilePress}
                         activeOpacity={0.7}
                       >
-                        <Ionicons name="pencil-outline" size={16} color="#ff4c4cff" />
+                        <Ionicons name="pencil-outline" size={16} color="#000000" />
                         <Text style={styles.editButtonText}>Edit</Text>
                       </TouchableOpacity>
                     )}
@@ -425,7 +428,7 @@ const Header = () => {
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="lock-closed-outline" size={20} color="#ff4c4cff" style={styles.menuPageIcon} />
+                  <Ionicons name="lock-closed-outline" size={20} color="#000000" style={styles.menuPageIcon} />
                   <Text style={styles.menuPageText}>Privacy Policy</Text>
                   <Text style={styles.menuPageArrow}>›</Text>
                 </TouchableOpacity>
@@ -443,7 +446,7 @@ const Header = () => {
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="git-compare-outline" size={20} color="#ff4c4cff" style={styles.menuPageIcon} />
+                  <Ionicons name="git-compare-outline" size={20} color="#000000" style={styles.menuPageIcon} />
                   <Text style={styles.menuPageText}>Return and Refund Policy</Text>
                   <Text style={styles.menuPageArrow}>›</Text>
                 </TouchableOpacity>
@@ -461,7 +464,7 @@ const Header = () => {
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="document-text-outline" size={20} color="#ff4c4cff" style={styles.menuPageIcon} />
+                  <Ionicons name="document-text-outline" size={20} color="#000000" style={styles.menuPageIcon} />
                   <Text style={styles.menuPageText}>Terms & Conditions</Text>
                   <Text style={styles.menuPageArrow}>›</Text>
                 </TouchableOpacity>
@@ -479,7 +482,7 @@ const Header = () => {
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="logo-dropbox" size={20} color="#ff4c4cff" style={styles.menuPageIcon} />
+                  <Ionicons name="logo-dropbox" size={20} color="#000000" style={styles.menuPageIcon} />
                   <Text style={styles.menuPageText}>Bulk Orders Inquiries</Text>
                   <Text style={styles.menuPageArrow}>›</Text>
                 </TouchableOpacity>
@@ -511,9 +514,11 @@ const Header = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#232F3E',
+    backgroundColor: '#ffffffff',
     paddingTop: Platform.OS === 'ios' ? 50 : 10,
     paddingBottom: 10,
+     borderBottomWidth: 1,
+    borderBottomColor: '#474747ff',
   },
  topSection: {
     flexDirection: 'row',
@@ -525,7 +530,7 @@ const styles = StyleSheet.create({
   },
   menuButton: {
     padding: 8,
-    width: 44, 
+    width: 44,
   },
   logoImage: {
     width: 220, 
@@ -543,11 +548,16 @@ const styles = StyleSheet.create({
     position: 'relative',
     padding: 8,
   },
+  cartIcon: {
+  width: 28,
+  height: 28,
+  tintColor: '#000000',
+},
   badge: {
     position: 'absolute',
     top: 2,
     right: 2,
-    backgroundColor: '#FF9900',
+    backgroundColor: '#FF0000',
     borderRadius: 10,
     minWidth: 18,
     height: 18,
@@ -574,6 +584,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
     height: 45,
+    borderWidth: 2,
+    borderColor: '#000000',
   },
   searchIcon: {
     marginRight: 10,
@@ -640,7 +652,7 @@ const styles = StyleSheet.create({
   searchResultPrice: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#FF9900',
+    color: '#000000',
   },
   searchLoadingContainer: {
     padding: 20,
@@ -731,7 +743,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: '#FF9900',
+    backgroundColor: '#c7c7c7ff',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
@@ -776,7 +788,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   signInButton: {
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#000000',
     marginHorizontal: 20,
     marginTop: 20,
     paddingVertical: 16,
@@ -801,10 +813,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#da4925ff',
+    borderColor: '#000000',
   },
   signOutButtonText: {
-    color: '#da4925ff',
+    color: '#000000',
     fontSize: 16,
     fontWeight: 'bold',
   },

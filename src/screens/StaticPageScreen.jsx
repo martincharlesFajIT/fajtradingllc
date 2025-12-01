@@ -114,41 +114,143 @@ const StaticPageScreen = () => {
         return {
           sections: [
             {
-              heading: 'Agreement to Terms',
-              text: 'By accessing and using the FAJ Trading LLC mobile application, you agree to be bound by these Terms and Conditions. If you disagree with any part of these terms, you may not access our application.'
+              heading: 'Introduction',
+              text: 'Welcome to fajtradingllc.com, a service provided by F A J Trading LLC. By using the fajtradingllc.com service, you agree to accept the following terms and conditions.All products, services, and information displayed on fajtradingllc.com constitute an “invitation to offer.” Your order for purchase represents your “offer,” which will be subject to these terms and conditions. F A J Trading LLC reserves the right to accept or reject your offer.If you provide us with a valid email address, we will notify you by email as soon as possible to confirm receipt of your order. We will email you again to confirm the details and process your order. Our acceptance of your order occurs upon the dispatch of the product(s) you ordered. Please note that no act or omission by fajtradingllc.com prior to the actual dispatch of the product(s) will constitute acceptance of your offer.'
             },
             {
-              heading: 'Use of Application',
-              text: 'You agree to use our application only for lawful purposes and in a way that does not infringe the rights of others or restrict their use and enjoyment of the application.\n\nYou must not:\n• Use the application in any unlawful manner\n• Attempt to gain unauthorized access\n• Transmit viruses or malicious code\n• Collect data from the application without permission\n• Impersonate another person or entity'
+              heading: 'Pricing Information',
+              text: 'At fajtradingllc.com, we strive to provide accurate product and pricing information. However, pricing or typographical errors may occasionally occur. We cannot confirm the price of a product until after you place your order. If a product is listed at an incorrect price or with inaccurate information due to an error, fajtradingllc.com reserves the right, at our sole discretion, to refuse or cancel any orders for that product unless the item has already been dispatched.If an item is mispriced, we may either contact you for further instructions or cancel your order and notify you of the cancellation. Your offer will not be considered accepted until the product you ordered has been dispatched. We also reserve the right to modify the products price and reach out to you using the email address you provided during registration, or cancel the order and inform you of such cancellation.Once your order is accepted, the payment will be charged to your credit card, and you will receive an email confirmation that the payment has been processed. Please note that payment may be processed before we dispatch your ordered product. If we need to cancel your order after processing the payment, the amount will be reversed back to your credit card. Under no circumstances will cash disbursements be made.We aim to offer you the best prices possible at fajtradingllc.com and in  F A J Trading LLC store. However, prices may differ between our online platform and physical store to ensure we remain the lowest price provider in your geographic region. Additionally, prices and availability are subject to change without prior notice.'
             },
             {
-              heading: 'User Accounts',
-              text: 'When you create an account with us, you must provide accurate, complete, and current information. You are responsible for:\n\n• Maintaining the confidentiality of your account\n• All activities that occur under your account\n• Notifying us immediately of any unauthorized use\n\nWe reserve the right to suspend or terminate your account if you violate these terms.'
+              heading: 'Delivery',
+              text: 'Orders within the UAE are usually delivered within 2 to 5 business days. However, for larger items such as refrigerators, air conditioners, kitchen equipment (50 inches and above), commercial espresso machines, and other major products, delivery may take 5 to 7 business days.Deliveries outside city limits may incur additional charges, which will depend on the category of the product.'
             },
             {
-              heading: 'Orders and Payments',
-              text: 'All orders are subject to acceptance and availability. We reserve the right to refuse any order. Prices are subject to change without notice.\n\nPayment must be received before your order is processed. We accept the following payment methods:\n• Credit/Debit Cards\n• Digital Wallets\n• Cash on Delivery (where available)\n\nBy placing an order, you warrant that you are legally capable of entering into binding contracts.'
+              heading: 'Express Delivery',
+              text: 'Express Delivery is available for customers who need quicker delivery, typically within 24 hours for orders placed within the city limits of Dubai and Sharjah. This service is offered for select products only, which are marked with an Express Delivery badge on our website.F A J Members can benefit from free Express Delivery on applicable products. The customers can filter for eligible products using the Express Delivery filter.Place your order before 12 noon, and with “Express Delivery,” you will receive it the same day if you are in Dubai or Sharjah'
             },
             {
-              heading: 'Intellectual Property',
-              text: 'The application and its original content, features, and functionality are owned by FAJ Trading LLC and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.\n\nYou may not reproduce, distribute, modify, or create derivative works without our express written permission.'
+              heading: 'Account and Registration Obligations',
+              text: '"Your Information" refers to any details you provide to us during the registration, purchasing, or listing process, in the feedback section, or through any email features. We will protect Your Information in accordance with our Privacy Policy. By using the Site, you are responsible for keeping your Account and Password confidential and for restricting access to your computer. You agree to take responsibility for all activities that occur under your Account or Password. fajtradingllc.com is not liable for any loss or damage that may result from your failure to protect your password or account. If you know or suspect that someone else knows your password, please notify us immediately using the address provided below. If we believe there may be a security breach or misuse of the fajtradingllc.com Site, we may require you to change your password or suspend your account without any liability to fajtradingllc.com.'
             },
             {
-              heading: 'Limitation of Liability',
-              text: 'FAJ Trading LLC shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from:\n\n• Your use or inability to use the application\n• Unauthorized access to your data\n• Errors or omissions in content\n• Any other matter relating to the application\n\nOur total liability shall not exceed the amount paid by you for products purchased through our application.'
+              heading: 'Additionally, you agree to:',
+              text: 'Provide true, accurate, current, and complete information about yourself as prompted by the F A J Trading LLC registration form (this information will be referred to as "Registration Data").Maintain and promptly update your Registration Data to ensure it remains true, accurate, current, and complete.If you provide any information that is untrue, inaccurate, incomplete, or not current, or if fajtradingllc.com has reasonable grounds to suspect that such information is untrue or inaccurate, we reserve the right to indefinitely suspend or terminate your membership and deny you access to the Site.'
             },
             {
-              heading: 'Governing Law',
-              text: 'These Terms shall be governed by and construed in accordance with the laws of the United Arab Emirates, without regard to its conflict of law provisions.\n\nAny disputes arising from these terms will be subject to the exclusive jurisdiction of the courts of Dubai, UAE.'
+              heading: 'Return and Exchange Policy',
+              text: 'At Fajtradingllc.com, your satisfaction is our priority. If you are not satisfied with your purchase, we will accept returns of products within seven (7) days from the date of collection or delivery. Please review the following terms and conditions for returns and exchanges:'
             },
             {
-              heading: 'Changes to Terms',
-              text: 'We reserve the right to modify or replace these Terms at any time. We will provide notice of any significant changes by posting the new Terms on this page.\n\nYour continued use of the application after changes are posted constitutes acceptance of the new Terms.'
+              heading: 'Contact Information:',
+              text: 'Customers can reach us by calling 971507063378, emailing us at sales@fajtradingllc.com, or contacting us via WhatsApp at +971507063378.'
             },
             {
-              heading: 'Contact Us',
-              text: 'If you have any questions about these Terms and Conditions, please contact us:\n\nEmail: legal@fajtradingllc.com\nPhone: +971-XX-XXX-XXXX\nAddress: Dubai, United Arab Emirates'
-            }
+              heading: 'Returns and Exchanges:',
+            },
+            {
+              heading: 'Accessories and Personal Care Items:',
+              text: 'Returns are accepted if the product is sealed and packed or if it has a manufacturing defect upon opening. No returns are accepted for opened products in good working condition.'
+            },
+             {
+              heading: 'Hard Goods:',
+              text: 'The product must be in the same condition as when received (unopened, with the original packaging, including accessories, user manuals, warranty cards, and brand seals). For IT and telecom products, no returns are allowed once activated by the customer.'
+            },
+            {
+              heading: 'Unopened Online Purchases:',
+              text: 'Returns and refunds do not apply to unopened online purchases. For opened items, returns are allowed but a restocking fee will apply. If you wish to receive unopened units, you must sign an acknowledgment releasing Fajtradingllc.com from any further claims.'
+            },
+            {
+              heading: 'Required Documentation:',
+              text: 'The product must be accompanied by the original sales invoice for returns or exchanges. It must be unused and unopened, with all original packaging materials, parts, accessories, manuals, registration cards, free-of-cost (FOC) bundled products, and promotional vouchers.'
+            },
+            {
+              heading: 'Returns and Exchanges Not Applicable:',
+              text: 'If the packaging is incomplete or the product is damaged or scratched. For customized or special-order products, cut cables or wires, apparel, personal care, and hygiene products. If the online activation code is scratched or redeemed. If VAT has been refunded against the invoice.'
+            },
+            {
+              heading: 'Restocking Fees:',
+              text: 'If the packaging is soiled or opened and the product is not defective, unused, or has no visible scratches, the product will be accepted back with a minimum restocking fee of 15% or as per applicable criteria. For major units/devices and medium home appliances and large panels, parts, electric / electronics devices, restocking fees will be determined after a review by the authorized service partner.Returns for Major/Medium Home Appliances/ Electrical & Electronics Devices Audio/Video Products:Returns or exchanges will be based on the investigation report and approval from the manufacturer’s authorized service center.'
+            },
+            {
+              heading: 'Handling Charges for Returns:',
+              text: 'For customers who accept supplier delivery and request a return within 7 days of purchase, handling charges will apply.'
+            },
+            {
+              heading: 'Dead on Arrival (DOA) or Non-Functioning Products:',
+              text: 'Products that arrive dead on arrival or are not functioning as per the manual will be exchanged or returned after verification by Fajtradingllc.com personnel or the manufacturer’s authorized service center. This process may take up to four business days.'
+            },
+            {
+              heading: 'Important Data and Information:',
+              text: 'Fajtradingllc.com is not responsible for transferring any data from returned products or for any loss of data stored on those products.'
+            },
+            {
+              heading: 'Refunds:',
+              text: 'Refunds for products purchased with credit or debit cards will be processed back to the same card used for the transaction.Refunds for purchases made using gift cards or loyalty points will be issued as a Fajtradingllc.com card.Refunds will be processed within 7 to 14 business days after the return process is completed.'
+            },
+            {
+              heading: 'Non-Refundable Charges:',
+              text: 'Service, delivery, and installation charges are non-refundable once acknowledged by the customer.Processing fees, any services provided, delivery, and installation charges are non-refundable once acknowledged by the customer. '
+            },
+            {
+              heading: 'Inspection:',
+              text: 'Customers should inspect products carefully before signing the Proof of Delivery (POD). Any product reported damaged after signing the POD will not qualify for returns or warranty claims.'
+            },
+            {
+              heading: 'Extended Warranty/Damage Protection Plans:',
+              text: 'These can be returned if the product is returned within the manufacturers warranty period. The decision of store management is final.'
+            },
+            {
+              heading: 'Cancellation Policy for Fajtradingllc.com',
+              text: 'Please be aware that there may be certain orders we are unable to accept and may need to cancel. We reserve the right, at our discretion, to refuse or cancel any order for any reason. Some situations that could lead to the cancellation of your order include: \n\n Limitations on quantities available for purchase.\n\n Inaccuracies or errors in product or pricing information. \n\n Issues identified by our credit and fraud prevention department. \n\n Instances where we suspect the customer is manipulating their account to place multiple orders \n\n We may also require additional verification or information before processing your order. If all or any part / product of your order is cancelled, or if we need additional information to accept your order, we will contact you.\n\n In the event your order is cancelled after your credit card has been charged, the amount will be refunded to your same credit card account. Please note that no cash disbursements will be made under any circumstances.'
+            },
+            {
+              heading: 'Quality Check',
+              text: 'In order to ensure top quality customer experience, we do a quality check on orders dispatched at our end. If we find any fault in the product(s) in your order, we reserve the right to cancel the order partially or fully. On such cases, we shall notify you about the same.'
+            },
+            {
+              heading: 'Cancellations by the Customer',
+              text: 'In case we receive a cancellation notice and the order has not been processed/approved by us, we shall cancel the order and refund the entire amount. We will not be able to cancel orders that have already been processed and shipped out by us. Fajtradingllc.com has the full right to decide whether an order has been processed or not. The customer agrees not to dispute the decision made by Fajtradingllc.com and accept Fajtradingllc.com’s decision regarding the cancellation.'
+            },
+            {
+              heading: 'Cancellations By Seller',
+              text: 'In case the seller is unable to fulfil the order due to stock unavailability, F A J Trading LLC Customer Care will connect with the customer & assist with alternatives.'
+            },
+            {
+              heading: 'Credit Card Details',
+              text: 'You agree, understand and confirm that the credit card details provided by you for availing of services on Fajtradingllc.com will be correct and accurate and you shall not use the credit card which is not lawfully owned by you, i.e. in a credit card transaction, you must use your own credit card. You further agree and undertake to provide the correct and valid credit card details to Fajtradingllc.com. Further the said information will not be utilized and shared by Fajtradingllc.com with any of the third parties unless required for fraud verifications or by law, regulation or court order. Fajtradingllc.com will not be liable for any credit card fraud. The liability for use of a card fraudulently will be on you and the onus to ‘prove otherwise’ shall be exclusively on you.'
+            },
+            {
+              heading: 'Fraudulent or Declined Transactions',
+              text: 'Fajtradingllc.com reserves the right to recover costs associated with goods, collection charges, and legal fees from individuals who utilise the site fraudulently. We also reserve the right to initiate legal proceedings against anyone engaged in fraudulent activities on the site or any unlawful acts that breach these terms and conditions.'
+            },
+            {
+              heading: 'Transactional Restrictions',
+              text: 'Orders will not be processed if any of the following events occur. Customers may request a refund in cases where money has been deducted from their accounts; however, please note that the order will not be fulfilled under any circumstances. \n\n. Cards issued outside of the GCC (Gulf Cooperation Council) and Egypt are not accepted./n/n. A maximum of two attempts per day is allowed. \n\n. A maximum of two transactions per day is permitted. \n\n. Unauthorized use of any credit or debit card is prohibited.'
+            },
+            {
+              heading: 'Electronic Communications',
+              text: 'When you visit the Site or send emails to us, you are communicating with us electronically. You consent to receive communications from us electronically. We will communicate with you by email or by posting notices on the Site. You agree that all agreements, notices, disclosures and other communications that we provide to you electronically satisfy any legal requirement that such communications be in writing.'
+            },
+            {
+              heading: 'You Agree and Confirm',
+              text: 'That in the event that a non-delivery occurs on account of a mistake by you (i.e. wrong name or address or any other wrong information) any extra cost incurred by Fajtradingllc.com for redelivery shall be claimed from you.\n\n That you will use the services provided by Fajtradingllc.com, its affiliates, consultants and contracted companies, for lawful purposes only and comply with all applicable laws and regulations while using the Site and transacting on the Site. \n\n You will provide authentic and true information in all instances where such information is requested of you. Fajtradingllc.com reserves the right to confirm and validate the information and other details provided by you at any point of time. If upon confirmation your details are found not to be true (wholly or partly), Fajtradingllc.com has the right in its sole discretion to reject the registration and debar you from using the Services of Fajtradingllc.com and / or other affiliated websites without prior intimation whatsoever. \n\n That you are accessing the services available on this Site and transacting at your sole risk and are using your best and prudent judgment before entering into any transaction through this Site \n\n That the address at which delivery of the product ordered by you is to be made will be correct and proper in all respects.'
+            },
+            {
+              heading: 'You may not use the Site/ mobile app for any of the following purposes:',
+              text: 'Disseminating any unlawful, harassing, libelous, abusive, threatening, harmful, vulgar, obscene, or otherwise objectionable material. \n\n Transmitting material that encourages conduct that constitutes a criminal offence results in civil liability or otherwise breaches any relevant laws, regulations or code of practice. \n\n Gaining unauthorized access to other computer systems. \n\n Interfering with any other person’s use or enjoyment of the Site. \n\n Breaching any applicable laws \n\n Interfering or disrupting networks or web sites connected to the Site.\n\n Making, transmitting or storing electronic copies of materials protected by copyright without the permission of the owner. \n\n We have made every effort to display the colors of our products that appear on the Site as accurately as possible. However, as the actual colors you see will depend on your monitor, we cannot guarantee that your monitor’s display of any color will be accurate. Shipping'
+            },
+            {
+              heading: 'Shipping costs are based on a combination of the following:',
+              text: 'Weight and dimensions of package.\n\n Method of shipment such as Ground, Air, Ship, Rail etc. \n\n The location you are shipping from (city, state, country) \n\n The location you are shipping to (also called the destination country) \n\n Costs can be considerably higher for international destinations. Generally, buyers pay additional costs such as duties, taxes, and customs clearance fees. For example, international rates may or may not include pickup and door-to-door delivery with customs clearance. An “extended area surcharge” may apply to buyers depending on their international locations.'
+            },
+            {
+              heading: 'Cash on Delivery Terms and Conditions',
+            },
+            {
+              heading: 'General Terms:',
+              text: 'Cash on Delivery (COD) is available as a payment method for products sold by F A J Trading LLC and select sellers. \n\n. In addition to any shipping charges, customers are required to pay a non-refundable convenience charge of AED 80 when choosing the cash-on-delivery payment method. \n\n. The maximum limit for orders placed using the COD payment method is AED 5,000. \n\n. After selecting Cash on Delivery, customers will receive an massage or automated call to confirm their order. The order will be on hold for the next 6 hours until the customer confirms it. If the order is not confirmed within this timeframe, it will be automatically cancelled, and the customer will be notified.\n\n. Our designated courier partner will contact the customer to provide a scheduled time range on the delivery day for delivering the order and collecting payment.\n\n. If the order cannot be delivered (after reasonable attempts by the courier), it will be cancelled, and the order will be returned to F A J Trading LLC. Customers are allowed to reschedule the delivery only once, within a maximum of two (2) business days.\n\n. The customer must pay the exact order amount in cash upon delivery. The courier will not accept any other payment methods.\n\n. Any eligible refunds will be processed as an online gift card to the customers account with F A J Trading LLC. This gift card can be used for any online purchases. \n\n. Customers should check the product for any signs of tampering before accepting it. However, customers are not permitted to open the package until payment has been completed. \n\n. Once payment has been made to the courier and the order has been handed over to the customer, the delivery process is considered complete. If there are any issues with the order, please contact us at +971 50 706 3378, email us at info@fajtradingllc.com, or visit the F A J Trading LLC store for assistance.'
+            },
           ]
         };
 
@@ -156,53 +258,24 @@ const StaticPageScreen = () => {
         return {
           sections: [
             {
-              heading: 'Welcome to Bulk Orders',
-              text: 'Thank you for your interest in bulk orders with FAJ Trading LLC. We specialize in providing high-quality products at competitive prices for businesses, organizations, and individuals requiring large quantities.'
+              text: 'Choose from a wide range of brands in coffee machines, coffee machine equipment, appliances, air conditioning, communications parts, and electrical/electronic devices, all at competitive prices. We provide high-quality products supported by a strong after-sales service network. If you’re considering innovative corporate, please fill in the details below, and let us assist you in making a purchase. Simply send us an email with your company’s contact information and the products you are interested in, and we will respond as soon as possible. \n\n Coffee Machines & Coffee Machines Equipment \n\n Appliances \n\n Air Conditioning \n\n Electrical Components \n\n Electronics Devices \n\n Home & Kitchen \n\n Health & Fitness \n\n Water Heaters \n\n Solar \n\n Get all your favorite products today in our convenient destination!'
             },
             {
-              heading: 'Benefits of Bulk Ordering',
-              text: 'When you order in bulk from us, you enjoy:\n\n• Significant volume discounts\n• Priority customer service\n• Flexible payment terms\n• Customized delivery schedules\n• Dedicated account manager\n• Exclusive access to wholesale pricing\n• Custom packaging options (for large orders)'
+              heading: 'WELCOME TO THE HUB OF BULK ORDERS',
+              text: 'At F A J Trading LLC, we proudly serve a diverse range of products to thousands of customers worldwide and are renowned for handling bulk orders seamlessly. We aim to simplify the payment process for our customers by offering easy payment methods. **How Do Bulk Orders & Enquiries Work? \n\n Follow these simple steps to streamline your shopping experience with F A J Trading LLC.'
             },
             {
-              heading: 'Minimum Order Quantities',
-              text: 'Our bulk order minimums vary by product category:\n\n• Electronics: Minimum 50 units\n• Home & Kitchen: Minimum 100 units\n• Fashion & Accessories: Minimum 200 units\n• Beauty Products: Minimum 100 units\n• Sports & Outdoors: Minimum 75 units\n\nFor specific product minimums, please contact our bulk orders team.'
+              heading: 'Centralized Platform for Everything',
+              text: 'Using our one-stop platform, you can easily place bulk orders. Our customer support team will reach out to discuss further details with you.'
             },
             {
-              heading: 'Pricing and Discounts',
-              text: 'Our bulk pricing structure offers increasing discounts based on order volume:\n\n• 50-99 units: 10% discount\n• 100-249 units: 15% discount\n• 250-499 units: 20% discount\n• 500-999 units: 25% discount\n• 1000+ units: 30% discount (custom quote)\n\nPrices are subject to market conditions and product availability. Contact us for a detailed quote.'
+              heading: 'Tailored Needs',
+              text: 'Customize your purchasing process based on your organizations requirements. This will help you navigate through products efficiently. Once your order is confirmed, you can finalize your quote and secure the deal.'
             },
             {
-              heading: 'How to Place a Bulk Order',
-              text: 'Follow these simple steps to place your bulk order:\n\n1. Contact our bulk orders team via email or phone\n2. Provide details about the products and quantities needed\n3. Receive a customized quote within 24-48 hours\n4. Review and approve the quote\n5. Arrange payment (various payment terms available)\n6. Confirm delivery schedule\n7. Receive your order\n\nWe work closely with you throughout the entire process to ensure a smooth experience.'
+              heading: 'Automated Tracking',
+              text: 'After confirming your order, you can make your payment online. Automated tracking and updates will be sent to you, including order status, delivery notifications, and unboxing status from our team.'
             },
-            {
-              heading: 'Payment Terms',
-              text: 'We offer flexible payment options for bulk orders:\n\n• Full payment upfront (additional 2% discount)\n• 50% deposit, 50% before delivery\n• Net 30 payment terms (for approved accounts)\n• Letter of Credit (for international orders)\n• Purchase Orders from registered businesses\n\nCredit applications are reviewed within 3-5 business days.'
-            },
-            {
-              heading: 'Delivery and Logistics',
-              text: 'We understand that timely delivery is crucial for your business:\n\n• Standard delivery: 7-14 business days\n• Express delivery: 3-5 business days (additional fee)\n• Custom delivery schedules available\n• Tracking provided for all orders\n• Multiple delivery locations supported\n• White-glove delivery service available\n\nShipping costs vary based on order size, weight, and destination.'
-            },
-            {
-              heading: 'Quality Assurance',
-              text: 'All bulk orders undergo rigorous quality control:\n\n• Pre-shipment inspection\n• Quality certificates provided\n• Product samples available before bulk order\n• Warranty coverage on all products\n• Easy returns process for defective items\n\nWe stand behind the quality of our products 100%.'
-            },
-            {
-              heading: 'Custom Solutions',
-              text: 'For large or unique orders, we can provide:\n\n• Custom branding and packaging\n• Product customization\n• Private labeling\n• Exclusive product sourcing\n• Import/export assistance\n• Inventory management solutions\n\nContact us to discuss your specific requirements.'
-            },
-            {
-              heading: 'Industries We Serve',
-              text: 'We work with clients across various industries:\n\n• Retail Stores and Chains\n• E-commerce Businesses\n• Corporate Gifting Companies\n• Event Planners and Organizers\n• Hotels and Hospitality\n• Educational Institutions\n• Government Agencies\n• NGOs and Charities\n• And many more!'
-            },
-            {
-              heading: 'Contact Our Bulk Orders Team',
-              text: 'Ready to place your bulk order? Get in touch with us:\n\n📧 Email: bulk@fajtradingllc.com\n📞 Phone: +971-XX-XXX-XXXX\n📱 WhatsApp: +971-XX-XXX-XXXX\n🕒 Hours: Sunday - Thursday, 9:00 AM - 6:00 PM GST\n\nOur team is here to help you save money and streamline your procurement process. We look forward to serving your bulk order needs!'
-            },
-            {
-              heading: 'Request a Quote',
-              text: 'To request a quote, please provide:\n\n• Your company name and contact information\n• List of products and quantities needed\n• Preferred delivery timeline\n• Delivery location\n• Any special requirements\n\nWe will respond with a detailed quote within 24-48 hours. For urgent requests, please call us directly.'
-            }
           ]
         };
 

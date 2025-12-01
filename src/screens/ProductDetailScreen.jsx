@@ -16,8 +16,8 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { fetchProductById } from '../shopifyApi';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext'; // ✅ Add this import
-import { createCheckout } from '../shopifyApi'; // ✅ Add this import
+import { useAuth } from '../context/AuthContext';
+import { createCheckout } from '../shopifyApi';
 
 const { width } = Dimensions.get('window');
 
@@ -29,7 +29,7 @@ const ProductDetailScreen = () => {
   const { productId, productName } = route.params;
   const scrollViewRef = useRef(null);
   const { addToCart } = useCart();
-  const { isSignedIn, user, accessToken } = useAuth(); // ✅ Add auth hook
+  const { isSignedIn, user, accessToken } = useAuth();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   dotActive: {
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#000000',
     width: 10,
     height: 10,
     borderRadius: 5,
@@ -734,7 +734,7 @@ const styles = StyleSheet.create({
   productTitle: { fontSize: 24, fontWeight: 'bold', color: '#232F3E', marginBottom: 5 },
   vendor: { fontSize: 16, color: '#666', marginBottom: 15 },
   priceContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap' },
-  price: { fontSize: 28, fontWeight: 'bold', color: '#da4925ff', marginRight: 10 },
+  price: { fontSize: 28, fontWeight: 'bold', color: '#000000', marginRight: 10 },
   comparePrice: { fontSize: 20, color: '#999', textDecorationLine: 'line-through', marginRight: 10 },
   discountBadge: { backgroundColor: '#da4925ff', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
   discountText: { color: '#FFFFFF', fontSize: 12, fontWeight: 'bold' },
@@ -824,7 +824,7 @@ const styles = StyleSheet.create({
   addToCartText: { color: '#da4925ff', fontSize: 16, fontWeight: 'bold' },
   buyNowButton: {
     flex: 1,
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#000000',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   policyButton: {
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#000000',
     marginHorizontal: 20,
     marginVertical: 15,
     paddingVertical: 12,

@@ -61,7 +61,7 @@ const CollectionScreen = () => {
 
       const [collectionData, productData, sidebarMenuData] = await Promise.all([
         fetchCollectionByHandle(handle),
-        fetchProductsByCollection(handle, 50), // Fetch more products for filtering
+        fetchProductsByCollection(handle, 50),
         fetchSidebarMenu()
       ]);
 
@@ -191,8 +191,7 @@ const CollectionScreen = () => {
         console.log(`Product: ${product.name}`);
         console.log('  Collections:', productCollectionHandles);
         console.log('  Titles:', productCollectionTitles);
-        
-        // Check if any of the product's collections match selected menu items
+      
         // Match by either title or handle
         const matches = currentFilters.selectedMenuItems.some(selectedItem => {
           // Try to match by title
@@ -273,7 +272,7 @@ const CollectionScreen = () => {
   // Price slider handlers with better touch handling
   const handleSliderTouch = (event, isMin) => {
     const { locationX } = event.nativeEvent;
-    const sliderWidth = width - 80; // Account for padding
+    const sliderWidth = width - 80;
     const percentage = Math.max(0, Math.min(1, locationX / sliderWidth));
     const value = Math.round(priceRange.min + (priceRange.max - priceRange.min) * percentage);
     
@@ -337,7 +336,7 @@ const CollectionScreen = () => {
         
         // Check if this menu item matches the current collection
         if (itemHandle === currentHandle) {
-          console.log(`✅ MATCH FOUND! "${item.title}"`);
+          console.log(`MATCH FOUND! "${item.title}"`);
           
           // Return all children of this item
           if (item.children && item.children.length > 0) {
@@ -347,7 +346,7 @@ const CollectionScreen = () => {
             });
             return item.children;
           } else {
-            console.log('⚠️ No children found for this menu item');
+            console.log('No children found for this menu item');
             return [];
           }
         }
@@ -460,11 +459,11 @@ const CollectionScreen = () => {
     return (
       <View style={{ padding: 20, alignItems: 'center' }}>
         {loadingMore ? (
-          <ActivityIndicator size="small" color="#da4925ff" />
+          <ActivityIndicator size="small" color="#7F141E" />
         ) : (
           <TouchableOpacity 
             onPress={loadMoreProducts} 
-            style={{ backgroundColor: '#da4925ff', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 6 }}
+            style={{ backgroundColor: '#7F141E', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 6 }}
           >
             <Text style={{ color: '#fff', fontWeight: '600' }}>Load More</Text>
           </TouchableOpacity>
@@ -651,7 +650,7 @@ const CollectionScreen = () => {
           <View style={styles.headerRight} />
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#da4925ff" />
+          <ActivityIndicator size="large" color="#000000" />
           <Text style={styles.loadingText}>Loading products...</Text>
         </View>
       </SafeAreaView>
@@ -712,7 +711,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 5,
     right: 5,
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#000000',
     borderRadius: 10,
     minWidth: 18,
     height: 18,
@@ -752,7 +751,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 2,
     right: 2,
-    backgroundColor: '#da4925ff',
+    backgroundColor: '#000000',
     borderRadius: 10,
     minWidth: 18,
     height: 18,
@@ -770,11 +769,11 @@ const styles = StyleSheet.create({
   productInfo: { padding: 12 },
   productName: { fontSize: 14, fontWeight: '500', color: '#232F3E', marginBottom: 4, minHeight: 35 },
   productBrand: { fontSize: 12, color: '#666', marginBottom: 4 },
-  productPrice: { fontSize: 16, fontWeight: 'bold', color: '#7F141E' },
+  productPrice: { fontSize: 16, fontWeight: 'bold', color: '#000000' },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40, paddingVertical: 60 },
   emptyTitle: { fontSize: 20, fontWeight: 'bold', color: '#232F3E', marginBottom: 10, textAlign: 'center' },
   emptySubtitle: { fontSize: 16, color: '#666', textAlign: 'center', marginBottom: 30, lineHeight: 22 },
-  retryButton: { backgroundColor: '#7F141E', paddingHorizontal: 30, paddingVertical: 12, borderRadius: 6 },
+  retryButton: { backgroundColor: '#000000', paddingHorizontal: 30, paddingVertical: 12, borderRadius: 6 },
   retryButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
 
   // Modal Styles
@@ -833,7 +832,7 @@ const styles = StyleSheet.create({
   priceDisplayText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#da4925ff',
+    color: '#000000',
   },
   priceDisplaySeparator: {
     fontSize: 18,
@@ -857,7 +856,7 @@ const styles = StyleSheet.create({
   },
   sliderFill: {
     height: '100%',
-    backgroundColor: '#7F141E',
+    backgroundColor: '#000000',
     borderRadius: 3,
     position: 'absolute',
   },
@@ -900,7 +899,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkboxChecked: {
-    backgroundColor: '#7F141E',
+    backgroundColor: '#000000',
     borderColor: '#7F141E',
   },
   checkmark: {
@@ -933,7 +932,7 @@ const styles = StyleSheet.create({
   },
   applyButton: {
     flex: 1,
-    backgroundColor: '#7F141E',
+    backgroundColor: '#000000',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
